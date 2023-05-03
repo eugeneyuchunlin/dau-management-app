@@ -1,0 +1,20 @@
+{
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "bootstrap": "^5.2.3",
+    "chart.js": "^4.3.0",
+    "cookie": "^0.5.0",
+    "js-cookie": "^3.0.5",
+    "next": "^13.3.2",
+    "react": "^18.2.0",
+    "react-bootstrap": "^2.7.4",
+    "react-chartjs-2": "^5.2.0",
+    "react-dom": "^18.2.0",
+    "sqlite3": "^5.1.6"
+  }
+}
