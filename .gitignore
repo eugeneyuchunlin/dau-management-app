@@ -46,3 +46,4 @@ package-lock.json
 
 .next/
 *.db
+config.js

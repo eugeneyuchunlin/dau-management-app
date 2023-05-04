@@ -18,7 +18,7 @@ function getUserName(api_key){
 
 // post the following json object to this api
 // {
-//      "api-key" : "",
+//      "api_key" : "",
 //      "job_id" : "",
 //      "start_time" : "",
 //      "solve_time" : ""
