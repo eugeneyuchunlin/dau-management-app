@@ -30,7 +30,7 @@ export default function Nvbar({data}) {
           <Navbar.Brand href="/">Project Name</Navbar.Brand>
           <Nav className="me-auto">
             <Nav.Link href="/jobs">Alive Job List</Nav.Link>
-            {/* <Nav.Link href="/history">History</Nav.Link> */}
+            <Nav.Link href="/history">History</Nav.Link>
           </Nav>
           <Navbar.Collapse className="justify-content-end">
             {isLoggedIn ? (

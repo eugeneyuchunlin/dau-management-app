@@ -30,3 +30,16 @@ export async function fetchJobList() {
     })
     return data;
 }
+
+export const daysInTheMonth = (year, month) => {
+    return new Date(year, month, 0).getDate();
+}
+
+export const daysInCurrentMonth = () => {
+    const current_date = new Date();
+    const current_year = current_date.getFullYear();
+    let current_month = current_date.getMonth() + 1;
+
+    return daysInTheMonth(current_year, current_month);
+}
+
