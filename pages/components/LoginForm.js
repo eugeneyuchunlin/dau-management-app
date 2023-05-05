@@ -35,7 +35,9 @@ export default function LoginForm() {
 
         if (resData.message === 'ok') {
           // redirect to home page
-          window.location.href = '/';
+          // window.location.href = '/';
+          // reload the page
+          window.location.reload();
         }else{
             alert(resData.message)
         }

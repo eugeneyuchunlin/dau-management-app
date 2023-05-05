@@ -77,11 +77,11 @@ export default function JobList({data}) {
         }
 
         fetchJobs();
-
-        const intervalId = setInterval(()=>{
-            fetchJobs();
-        }, 100000)
-        return () => clearInterval(intervalId); 
+        return ()=>{};
+        // const intervalId = setInterval(()=>{
+        //     fetchJobs();
+        // }, 100000)
+        // return () => clearInterval(intervalId); 
     }, [])
 
     const { isLoggedIn } = useContext(LoginContext);

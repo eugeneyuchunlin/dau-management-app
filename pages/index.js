@@ -4,6 +4,9 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { Pie } from "react-chartjs-2";
 import Nvbar from './components/nvbar.js'
 import { LoginProvider } from './contexts/LoginContext';
+import Container from 'react-bootstrap/Container';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -12,7 +15,7 @@ export default function HomePage({data}){
     console.log(data)
 
 
-    const fake_data = {
+    const graph_data = {
         labels: data.map((item) => item.username),
         datasets: [
           {
@@ -38,12 +41,25 @@ export default function HomePage({data}){
           },
         ],
       };
+    const options = {
+        responsive: true,
+        maintainAspectRatio: false, // set to false to allow adjusting chart size
+      };
     return (
         <>
             <LoginProvider>
                 <Nvbar />
             </LoginProvider>
-            {/* <Pie data={fake_data} /> */}
+            <Container fluid="xl">
+                <Row>
+                    <Col>
+
+                        <div className='maincontainer'>
+                            <Pie data={graph_data} options={options} height={400}/>
+                        </div>
+                    </Col>
+                </Row>
+            </Container>
         </>
     )
 
@@ -59,8 +75,22 @@ export async function getStaticProps(){
 }
 
 async function getDataFromDatabase(){
-    const sql = `SELECT id, username, SUM(computation_time_ms) AS total_time
-    FROM service_stats
+    // get the current month and days
+    const current_date = new Date();
+    // const current_year = current_date.getFullYear();
+    let current_month = current_date.getMonth() + 1;
+
+    // get the number of days in the current month
+    const days_in_month = new Date(current_date.getFullYear(), current_month, 0).getDate();
+
+    // make the the current_month is 2 digits
+    if(current_month < 10){
+        current_month = '0' + current_month;
+    }
+
+    // query the database for the data in the current month
+    const sql = `SELECT id, username, SUM(computation_time_ms) AS total_time 
+    FROM service_stats WHERE start_time BETWEEN '2023-${current_month}-01 00:00:00' AND '2023-05-${days_in_month} 23:59:59';
     GROUP BY username;`
 
     return new Promise((resolve, reject) => {

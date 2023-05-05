@@ -1,0 +1,8 @@
+.maincontainer{
+    border: 1px solid lightgrey;
+    border-radius: 1rem;
+    padding: 2rem;
+    margin-top: 2rem;
+    margin-left: 5rem;
+    margin-right: 5rem;
+}

@@ -1,11 +1,11 @@
-import React from 'react'
+import React, { useContext, useState } from 'react'
 import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-import { useContext } from 'react';
 import LoginContext from '../contexts/LoginContext';
+import LoginModal from './LoginModal';
 
 // keep in mind
 // the nvbar will be re-render when the context is changed
@@ -13,10 +13,15 @@ import LoginContext from '../contexts/LoginContext';
 export default function Nvbar({data}) {
 
   const { username, isLoggedIn, logout} = useContext(LoginContext);
-  
-  const onClickHandler = () => {
+  const [ show, setShow ]= useState(false);
+
+  const onLogoutClickHandler = () => {
     logout();
   }
+
+  
+  const showLoginModalHandler = () => setShow(true);
+  const hideLoginModalHandler = () => setShow(false);
 
   return (
     <>
@@ -24,22 +29,25 @@ export default function Nvbar({data}) {
         <Container>
           <Navbar.Brand href="/">Project Name</Navbar.Brand>
           <Nav className="me-auto">
-            <Nav.Link href="/jobs">Job List</Nav.Link>
+            <Nav.Link href="/jobs">Alive Job List</Nav.Link>
+            {/* <Nav.Link href="/history">History</Nav.Link> */}
           </Nav>
           <Navbar.Collapse className="justify-content-end">
             {isLoggedIn ? (
               <Navbar.Text>
-                Username : {username} <Nav.Link href="#" onClick={onClickHandler}>Logout</Nav.Link>
+                Username : {username} <Nav.Link href="#" onClick={onLogoutClickHandler}>Logout</Nav.Link>
               </Navbar.Text>
             ) : (<>
               <Navbar.Text>
-                <a href="/login">Login</a>
+                <a href="#" onClick={showLoginModalHandler}>Login</a>
             </Navbar.Text>
             </>)}
           
         </Navbar.Collapse>
         </Container>
       </Navbar>
+
+      <LoginModal show={show} handleClose={hideLoginModalHandler} />
     </>
   );
 }

@@ -13,7 +13,9 @@ export default function JobsPage() {
         <>
             <LoginProvider>
                 <Nvbar />
-                <JobList />
+                {/* <div className='maincontainer'> */}
+                    <JobList />
+                {/* </div> */}
             </LoginProvider>
 
         </>
