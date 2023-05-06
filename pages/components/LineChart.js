@@ -26,6 +26,7 @@ ChartJS.register(
 
 export const options = {
     responsive: true,
+    maintainAspectRatio: false, // set to false to allow adjusting chart size
     plugins: {
         legend: {
             position: 'top',
@@ -35,6 +36,20 @@ export const options = {
             text: 'Daily Usage',
         },
     },
+    scales: {
+        y: {
+            title : {
+                display: true,
+                text: 'Time (minutes)'
+            }
+        },
+        x: {
+            title : {
+                display: true,
+                text: 'Date'
+            }
+        }
+    }
 };
 
 export default function LineChart({daily_data}) {
@@ -91,5 +106,5 @@ export default function LineChart({daily_data}) {
 
     // console.log(data);
 
-    return <Line options={options} data={data} />;
+    return <Line options={options} data={data} height={400} width={400}/>;
 }
