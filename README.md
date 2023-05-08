@@ -23,7 +23,7 @@ Post/Update the `solve_time` of a job to the server.
     "api_key" : [your api key of dau-management-app],
     "job_id" : [your job_id],
     "solve_time" : [solve time acquired from the result of solution]
-    }
+}
 ```
 
 #### For example
