@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import Nvbar from './components/nvbar.js'
-import JobList from './components/JobList.js';
-import { LoginProvider } from './contexts/LoginContext';
+import Nvbar from '../common/components/nvbar.js'
+import JobList from '../common/components/JobList.js';
+import { LoginProvider } from '../common/contexts/LoginContext';
 
 import { Container, Row, Col } from 'react-bootstrap';
 

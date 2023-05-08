@@ -1,12 +1,12 @@
 import React from 'react';
 import db from '../database'
-import Nvbar from './components/nvbar.js'
-import { LoginProvider } from './contexts/LoginContext';
+import Nvbar from '../common/components/nvbar.js'
+import { LoginProvider } from '../common/contexts/LoginContext';
 import { Container, Row, Col} from 'react-bootstrap';
-import PieChart from './components/PieChart';
-import LineChart from './components/LineChart'
+import PieChart from '../common/components/PieChart';
+import LineChart from '../common/components/LineChart'
 
-import { daysInCurrentMonth, daysInTheMonth } from './lib/utils';
+import { daysInCurrentMonth, daysInTheMonth } from '../util/lib/utils';
 
 
 export default function HomePage(props){

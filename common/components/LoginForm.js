@@ -1,12 +1,7 @@
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 
-import { useContext } from 'react';
-import LoginContext from '../contexts/LoginContext';
-
-
 export default function LoginForm() {
-    const { login } = useContext(LoginContext);
 
     const handleSubmit = async (event) => {
         event.preventDefault();

@@ -12,7 +12,7 @@ import {
 import { Line } from 'react-chartjs-2';
 import faker from 'faker';
 
-import { daysInCurrentMonth, daysInTheMonth } from '../lib/utils';
+import { daysInCurrentMonth, daysInTheMonth } from '../../util/lib/utils';
 
 ChartJS.register(
     CategoryScale,

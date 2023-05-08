@@ -1,7 +1,7 @@
 import db from "../../database"
 import FUJITSU_API_KEY from "../../config"
 
-import { fetchJobList } from "../lib/utils"
+import { fetchJobList } from "../../util/lib/utils"
 
 
 async function deleteJob(job_id) {

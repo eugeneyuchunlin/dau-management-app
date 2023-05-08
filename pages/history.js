@@ -1,8 +1,8 @@
-import Nvbar from "./components/nvbar"
-import { LoginProvider } from "./contexts/LoginContext"
+import Nvbar from "../common/components/nvbar"
+import { LoginProvider } from "../common/contexts/LoginContext"
 
 import { Col, Row, Container } from "react-bootstrap";
-import HistoryTable from "./components/historyTable";
+import HistoryTable from "../common/components/HistoryTable";
 
 import db from '../database'
 

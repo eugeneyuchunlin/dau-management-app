@@ -43,3 +43,6 @@ export const daysInCurrentMonth = () => {
     return daysInTheMonth(current_year, current_month);
 }
 
+export default function util(){
+    return (<></>)
+}

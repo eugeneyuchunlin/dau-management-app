@@ -2,17 +2,10 @@ import React from 'react';
 import Modal from 'react-bootstrap/Modal';
 
 import LoginForm from './LoginForm';
-import { useContext } from 'react';
-import LoginContext from '../contexts/LoginContext';
 
 
 export default function LoginModal({show, handleClose}) {
 
-    const { username, isLoggedIn, logout} = useContext(LoginContext);
-    
-    const onClickHandler = () => {
-        logout();
-    }
 
     return (
         <>

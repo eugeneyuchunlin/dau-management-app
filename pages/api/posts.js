@@ -1,6 +1,6 @@
 import { ApiError } from 'next/dist/server/api-utils';
 import db from '../../database'
-import { fetchJobList } from '../lib/utils';
+import { fetchJobList } from '../../util/lib/utils';
 
 function getUserName(api_key) {
   return new Promise((resolve, reject) => {
@@ -75,7 +75,7 @@ async function insertComputationData(username, job_id, solve_time) {
 //      "job_id" : "",
 //      "solve_time" : ""
 // }
-export default async function (req, res) {
+export default async function handler(req, res) {
   if (req.method === 'POST'){
     try{
       const { api_key, job_id, solve_time } = req.body;
