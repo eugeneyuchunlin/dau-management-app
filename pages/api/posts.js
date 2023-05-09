@@ -20,7 +20,7 @@ async function getUserName(api_key) {
 }
 
 
-async function synchronizeFujitsuData(job_id) {
+async function getJobStatusById(job_id) {
   try {
     const data = await fetchJobList();
     const job_status_list = data.job_status_list;
@@ -32,9 +32,8 @@ async function synchronizeFujitsuData(job_id) {
   }
 }
 
-async function insertComputationData(username, job_id) {
+async function insertComputationData(username, job_id, job_status) {
   try{
-    const job_status = await synchronizeFujitsuData(job_id);
     let sql, params;
     if (job_status === undefined) {
       // job_status is undefined when the job is not found on the fujitsu server
@@ -62,27 +61,35 @@ async function insertComputationData(username, job_id) {
 // get the solution from the Fujitsu API
 async function getSolution(job_id) {
   try {
-    const job_result = await fetchJobResult(job_id);
-    console.log("job_result line 76", job_result)
-    // solve time
-    const solve_time = job_result.qubo_solution.timing.solve_time;
 
-    // update the solve time in the database
-    const sql = 'UPDATE test_service_stats SET computation_time_ms = ? WHERE job_id = ?';
+    const interval_id = setInterval(async () => {
+      const job_result = await fetchJobResult(job_id);
+      console.log("job_result line 76", job_result)
 
-    const params = [solve_time, job_id];
+      if(job_result.status === 'Done'){
+        // job is done
+        // solve time
+        const solve_time = job_result.qubo_solution.timing.solve_time;
+        const sql = 'UPDATE test_service_stats SET computation_time_ms = ?, status = ? WHERE job_id = ?';
+        const params = [solve_time, job_result.status, job_id];
 
-    // console.log(solve_time);
-    return new Promise((resolve, reject) => {
-      db.run(sql, params, (err) => {
-        if (err) {
-          reject(new Error('Internal Server error'));
-        }
-        resolve();
-      });
-    })
+        clearInterval(interval_id);
+        return new Promise((resolve, reject) => {
+          db.run(sql, params, (err) => {
+            if (err) {
+              reject(new Error('Internal Server error'));
+            }
+            resolve();
+          })
+        })
+
+      }
+
+    }, 3000);
+
   } catch (err) {
-    throw new Error('Error fetching Fujitsu job data: ' + err.message);
+    console.log('Failed to get solution from Fujitsu API')
+    // throw new Error('Error fetching Fujitsu job data: ' + err.message);
   }
 }
 
@@ -98,18 +105,33 @@ export default async function handler(req, res) {
     try{
       const username = await getUserName(api_key);
       try{
-        await insertComputationData(username, job_id);
+        const job_status = await getJobStatusById(job_id);
         try{
-          // const job_status = await getSolution(job_id);
+          await insertComputationData(username, job_id, job_status);
+          if(job_status !== undefined){
+            // job_status is undefined when the job is not found on the fujitsu server
+            // try to get the solution
+            if(job_status.job_status === 'Done'){
+              // get the solution immediately
+              console.log("get solution immediately")
+              getSolution(job_id);
+            }else{
+              // set timer to wait
+              console.log("set timer to wait")
+              setTimeout(getSolution, time_limit_sec * 1000, job_id) 
+            }
+          }
           res.status(200).json({'message' : 'success'});
-        }catch(err){
-          res.status(400).json({error : err.message});
+        }catch(err){ // Failed to insert computation data
+          // internal server error
+          res.status(500).json({error : err.message});
         }
-      }catch(err){
-        // internal server error
-        res.status(500).json({error : err.message});
+      }catch(err){ 
+        // Failed to get the Job status
+        // if it failes to get the job status, it means that the Fujitsu's server is dead
+        res.status(400).json({error : err.message});
       }
-    }catch(err){
+    }catch(err){ // Failed to get the username
       // api_key not found
       console.log(err.message)
       res.status(401).json({ error: err.message });
