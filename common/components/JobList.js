@@ -13,7 +13,7 @@ function Entry({index, data, isLoggedIn}){
     const hideModalHandler = () => setShowModal(false);
 
     const deleteHandler = () => {
-        console.log('clicked delete');
+        setShowModal(false);
 
         const endpoint = '/api/jobs';
         const options = {
