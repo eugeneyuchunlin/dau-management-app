@@ -33,40 +33,28 @@ async function synchronizeFujitsuData(job_id) {
 }
 
 async function insertComputationData(username, job_id) {
-  try {
+  try{
     const job_status = await synchronizeFujitsuData(job_id);
     let sql, params;
     if (job_status === undefined) {
-      sql = 'INSERT INTO test_service_stats (username, job_id) VALUES (?, ?)';
-      params = [username, job_id];
+      // job_status is undefined when the job is not found on the fujitsu server
+      sql = 'INSERT INTO test_service_stats (username, job_id) VALUES (?, ?) ON CONFLICT(job_id) DO UPDATE SET username = ?';
+      params = [username, job_id, username];
     } else {
-      sql = 'INSERT INTO test_service_stats (username, job_id, status, start_time) VALUES (?, ?, ?, ?)';
-      params = [username, job_id, job_status.job_status, job_status.start_time];
+      sql = 'INSERT INTO test_service_stats (username, job_id, status, start_time) VALUES (?, ?, ?, ?) ON CONFLICT(job_id) DO UPDATE SET username = ?, status = ?, start_time = ?';
+      params = [username, job_id, job_status.job_status, job_status.start_time, username, job_status.job_status, job_status.start_time];
     }
-    console.log(sql, params)
-    db.run(sql, params, (err) => {
-      if (err) {
-        if (err.message.includes('UNIQUE constraint failed')) {
-          let update_sql, update_params;
-          if (job_status === undefined) {
-            update_sql = 'UPDATE test_service_stats SET username = ? WHERE job_id = ?';
-            update_params = [username, job_id];
-          } else {
-            update_sql = 'UPDATE test_service_stats SET username = ?, status = ?, start_time = ? WHERE job_id = ?';
-            update_params = [username, job_status.job_status, job_status.start_time, job_id];
-          }
-          db.run(update_sql, update_params, (err) => {
-            if (err) {
-              throw new Error('Internal Server error');
-            }
-          });
-        } else {
-          throw new Error('Internal Server error');
+
+    return new Promise((resolve, reject) => {
+      db.run(sql, params, (err) => {
+        if (err) {
+          reject(new Error('Internal Server error'));
         }
-      }
-    });
-  } catch (err) {
-    throw new Error('Error inserting computation data');
+        resolve();
+      });
+    })
+  }catch(err){
+    throw new Error('Error inserting computation data :' + err.message);
   }
 }
 
@@ -112,7 +100,7 @@ export default async function handler(req, res) {
       try{
         await insertComputationData(username, job_id);
         try{
-          const job_status = await getSolution(job_id);
+          // const job_status = await getSolution(job_id);
           res.status(200).json({'message' : 'success'});
         }catch(err){
           res.status(400).json({error : err.message});
