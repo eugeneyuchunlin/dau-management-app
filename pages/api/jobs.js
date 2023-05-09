@@ -42,7 +42,7 @@ function synchronizeDB(data, existed_job_id) {
     if(unknown_username_job_list.length > 0){
         console.log("Insert unknown data")
         // for those unknown username_job_list, insert them into the db
-        const sql = 'INSERT INTO service_stats (username, job_id, status, start_time)';
+        const sql = 'INSERT INTO test_service_stats (username, job_id, status, start_time)';
         const values = unknown_username_job_list.map((job) => [job.username, job.job_id, job.job_status, job.start_time])
         const flattenedValues = [].concat.apply([], values);
         const placeholders = values.map(() => "(?, ?, ?, ?)").join(",");
@@ -63,7 +63,7 @@ function synchronizeDB(data, existed_job_id) {
         // FIXME: shouldn't update the data so frequently
 
         // for those known username_job_list, update the db
-        const update_sql = 'UPDATE service_stats SET status = ?, start_time = ? WHERE job_id = ?';
+        const update_sql = 'UPDATE test_service_stats SET status = ?, start_time = ? WHERE job_id = ?';
         known_username_job_list.forEach((job) => {
             db.run(update_sql, [job.job_status, job.start_time, job.job_id], (err) => {
                 if (err) {
@@ -84,7 +84,7 @@ function joinDBData(data) {
 
         const placeholders = job_id_list.map(() => "?").join(",");
         // console.log(placeholders)
-        const sql = `select username, job_id from service_stats where job_id in (${placeholders})`;
+        const sql = `select username, job_id from test_service_stats where job_id in (${placeholders})`;
         db.all(sql, job_id_list, (err, result) => {
             if (err) {
                 console.log("Error fetching data from db")

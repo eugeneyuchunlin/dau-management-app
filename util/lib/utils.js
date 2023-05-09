@@ -31,6 +31,29 @@ export async function fetchJobList() {
     return data;
 }
 
+export async function fetchJobResult(job_id){
+    const url = 'https://api.aispf.global.fujitsu.com';
+    const end_point = '/da/v3/async/jobs/result/' + job_id;
+    const options = {
+        method: 'GET',
+        headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            // "X-Access-Token": token
+            "X-Api-Key": FUJITSU_API_KEY
+        }
+    }
+    const response = await fetch(url + end_point, options);
+    const data = await response.json();
+    console.log("status : " ,response.status)
+    console.log("fetchJobResult ", data)
+
+    if(response.status === 400){
+        throw new Error(data.message[0].message);
+    }
+    return data;
+}
+
 export const daysInTheMonth = (year, month) => {
     return new Date(year, month, 0).getDate();
 }
