@@ -2,12 +2,17 @@ import React, { useEffect, useState, useContext} from 'react'
 import Table from 'react-bootstrap/Table'
 import Button from 'react-bootstrap/Button'
 import LoginContext, { LoginProvider }from '../contexts/LoginContext';
+import ConfirmDeleteModal from './ConfirmDeleteModal';
 
 function Entry({index, data, isLoggedIn}){
     
     const [ isVisiable, setIsVisiable] = useState(true);
+    const [ showModal, setShowModal ] = useState(false);
 
-    const deleteBtnHandler = () => {
+    const deleteBtnHandler = () => setShowModal(true);
+    const hideModalHandler = () => setShowModal(false);
+
+    const deleteHandler = () => {
         console.log('clicked delete');
 
         const endpoint = '/api/jobs';
@@ -25,7 +30,6 @@ function Entry({index, data, isLoggedIn}){
         const response = fetch(endpoint, options).then(
             (response)=> response.json()).
             then((data)=>{
-                console.log("line26", data)
                 setIsVisiable(false)
             })
     }
@@ -34,19 +38,25 @@ function Entry({index, data, isLoggedIn}){
         return null;
     }
 
-    console.log("line 43", isLoggedIn);
+    // console.log("line 43", isLoggedIn);
     
     return (
-        <tr>
-            <td>{index}</td>
-            <td>{data.job_id}</td>
-            <td>{data.username}</td>
-            <td>{data.job_status}</td>
-            <td>{data.start_time}</td>
-            {
-                isLoggedIn && <td><Button variant="outline-danger" onClick={deleteBtnHandler}>Delete</Button></td>
-            }
-        </tr>
+        <>
+            <tr>
+                <td>{index}</td>
+                <td>{data.job_id}</td>
+                <td>{data.username}</td>
+                <td>{data.job_status}</td>
+                <td>{data.start_time}</td>
+                {
+                    isLoggedIn && <td><Button variant="outline-danger" onClick={deleteBtnHandler}>Delete</Button></td>
+                }
+            </tr>
+
+            <ConfirmDeleteModal show={showModal} handleClose={hideModalHandler}  handleDelete={deleteHandler} user={data.username} job_id={data.job_id}/>
+        </>
+        
+
     )
 }
 
