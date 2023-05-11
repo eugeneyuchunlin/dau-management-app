@@ -74,7 +74,7 @@ function synchronizeDB(data, existed_job_id) {
 
         if(unknown_username_job_list_done.length > 0){
             insertUnknownJobs(
-                "(username, job_id, status, start_time, solve_time)",
+                "(username, job_id, status, start_time, computation_time_ms)",
                 "(?, ?, ?, ?, ?)",
                 unknown_username_job_list_done.map(
                     (job) => [job.username, job.job_id, job.job_status, job.start_time, job.solve_time]

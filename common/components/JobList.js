@@ -3,17 +3,26 @@ import Table from 'react-bootstrap/Table'
 import Button from 'react-bootstrap/Button'
 import LoginContext, { LoginProvider }from '../contexts/LoginContext';
 import ConfirmDeleteModal from './ConfirmDeleteModal';
+import DeleteMessageModal from './DeleteSuccessfullyModal';
 
 function Entry({index, data, isLoggedIn}){
     
     const [ isVisiable, setIsVisiable] = useState(true);
-    const [ showModal, setShowModal ] = useState(false);
+    const [ showDeleteModal, setShowDeleteModal ] = useState(false);
+    const [ showDeleteMessageModal, setShowDeleteMessageModal ] = useState(false);
 
-    const deleteBtnHandler = () => setShowModal(true);
-    const hideModalHandler = () => setShowModal(false);
+    const deleteBtnHandler = () => setShowDeleteModal(true);
+    const hideModalHandler = () => setShowDeleteModal(false);
+
+
+    const deleteMessageModalCloseHandler = () => {
+        setShowDeleteMessageModal(false);
+        setIsVisiable(false);
+    }
+
 
     const deleteHandler = () => {
-        setShowModal(false);
+        setShowDeleteModal(false);
 
         const endpoint = '/api/jobs';
         const options = {
@@ -28,9 +37,12 @@ function Entry({index, data, isLoggedIn}){
         }
 
         const response = fetch(endpoint, options).then(
-            (response)=> response.json()).
-            then((data)=>{
-                setIsVisiable(false)
+            (response)=> response.status).then((status)=>{
+                console.log('status : ', status)
+                if(status === 200){
+                    console.log('delete successfully')
+                    setShowDeleteMessageModal(true);
+                }
             })
     }
 
@@ -53,10 +65,9 @@ function Entry({index, data, isLoggedIn}){
                 }
             </tr>
 
-            <ConfirmDeleteModal show={showModal} handleClose={hideModalHandler}  handleDelete={deleteHandler} user={data.username} job_id={data.job_id}/>
+            <ConfirmDeleteModal show={showDeleteModal} handleClose={hideModalHandler}  handleDelete={deleteHandler} user={data.username} job_id={data.job_id}/>
+            <DeleteMessageModal show={showDeleteMessageModal} handleClose={deleteMessageModalCloseHandler} user={data.username} job_id={data.job_id}/>
         </>
-        
-
     )
 }
 
