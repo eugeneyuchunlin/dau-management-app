@@ -9,7 +9,9 @@ function Entry({index, data, isLoggedIn}){
     
     const [ isVisiable, setIsVisiable] = useState(true);
     const [ showDeleteModal, setShowDeleteModal ] = useState(false);
+
     const [ showDeleteMessageModal, setShowDeleteMessageModal ] = useState(false);
+    const [ deleteMessage, setDeleteMessage ] = useState(null);
 
     const deleteBtnHandler = () => setShowDeleteModal(true);
     const hideModalHandler = () => setShowDeleteModal(false);
@@ -36,14 +38,12 @@ function Entry({index, data, isLoggedIn}){
             })
         }
 
-        const response = fetch(endpoint, options).then(
-            (response)=> response.status).then((status)=>{
-                console.log('status : ', status)
-                if(status === 200){
-                    console.log('delete successfully')
-                    setShowDeleteMessageModal(true);
-                }
-            })
+        fetch(endpoint, options).then((response) => response.json())
+        .then((data)=>{
+                console.log(data)
+                setDeleteMessage(data.message)
+                setShowDeleteMessageModal(true);
+        })
     }
 
     if(!isVisiable){
@@ -66,7 +66,7 @@ function Entry({index, data, isLoggedIn}){
             </tr>
 
             <ConfirmDeleteModal show={showDeleteModal} handleClose={hideModalHandler}  handleDelete={deleteHandler} user={data.username} job_id={data.job_id}/>
-            <DeleteMessageModal show={showDeleteMessageModal} handleClose={deleteMessageModalCloseHandler} user={data.username} job_id={data.job_id}/>
+            <DeleteMessageModal show={showDeleteMessageModal} message={deleteMessage} handleClose={deleteMessageModalCloseHandler} user={data.username} job_id={data.job_id}/>
         </>
     )
 }

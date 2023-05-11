@@ -9,7 +9,7 @@ export default function ConfirmDeleteModal({show, handleClose, handleDelete, use
         <>
             <Modal show={show} onHide={handleClose} size='lg'>
                 <Modal.Header closeButton>
-                    <Modal.Title>Confirm Delete</Modal.Title>
+                    <Modal.Title>Confirm</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     Are you sure to delete this job?

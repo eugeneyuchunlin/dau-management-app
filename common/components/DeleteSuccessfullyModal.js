@@ -1,12 +1,12 @@
 import React from 'react';
 import Modal from 'react-bootstrap/Modal';
 
-export default function DeleteMessageModal({show, handleClose, user, job_id}){
+export default function DeleteMessageModal({show, message, handleClose, user, job_id}){
     return (
         <>
             <Modal show={show} onHide={handleClose} size='lg'>
                 <Modal.Header>
-                    <Modal.Title>Delete Successfully</Modal.Title>
+                    <Modal.Title>{message}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <b>Job ID:</b> {job_id}

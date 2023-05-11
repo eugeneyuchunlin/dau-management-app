@@ -194,7 +194,7 @@ export default async function handler(req, res) {
             
             deleteJob(req.body.job_id).then((response) => {
                 // console.log(response);
-                res.status(response.status).json({ message: 'delete successfully' })
+                res.status(response.status).json({ message: 'Delete successfully' })
                 resolve();
             }).catch((err) => {
                 console.log(err)
