@@ -1,13 +1,15 @@
 import { resolve } from "styled-jsx/css";
 import db from "../../database"
+import { createHash } from 'crypto'
 
 var cookie = require('cookie')
 
 
 function validation(username, password) {
     return new Promise((resolve, reject) => {
+        const hash_password = createHash('sha256').update(password).digest('hex');
         const sql = 'SELECT * FROM users WHERE username = ? AND password = ?';
-        const params = [username, password];
+        const params = [username, hash_password];
         db.get(sql, params, (err, row) => {
             // reject(500);
             if (err) {

@@ -1,9 +1,14 @@
 import db from "../../database"
 import FUJITSU_API_KEY from "../../config"
 
-import { fetchJobList } from "../../util/lib/utils"
+import { fetchJobList, getSolveTimeOfJobId } from "../../util/lib/utils"
+// import {}
 
-
+/**
+ * Delete the job on the Fujitsu server
+ * @param {[String]} job_id The job_id you'd like to delete
+ * @returns {[Response]]} response The response of the Fujitsu server of the delete request
+ */
 async function deleteJob(job_id) {
     const url = 'https://api.aispf.global.fujitsu.com';
     const end_point = '/da/v3/async/jobs/result/' + job_id;
@@ -12,13 +17,25 @@ async function deleteJob(job_id) {
         headers: {
             "Content-Type": "application/json",
             "Accept": "application/json",
-            // "X-Access-Token": token
             "X-Api-Key": FUJITSU_API_KEY
         }
     }
     const response = await fetch(url + end_point, options);
-    const data = await response.json();
     return response
+}
+
+function insertUnknownJobs(fields, question_signs, values){
+    const sql = `INSERT INTO test_service_stats`;
+    // const values = data.map((job) => [job.username, job.job_id, job.job_status, job.start_time, job.solve_time])
+    const flattenedValues = [].concat.apply([], values);
+    const placeholders = values.map(() => question_signs).join(",");
+    const insert_sql = `${sql} ${fields} VALUES ${placeholders}`;
+
+    db.run(insert_sql, flattenedValues, (err) => {
+        if (err) {
+            console.log(err);
+        }
+    })
 }
 
 // make the job list from fujitsu and db consistent
@@ -29,7 +46,7 @@ function synchronizeDB(data, existed_job_id) {
 
     var unknown_username_job_list = []
     var known_username_job_list = []
-    console.log('existed job id', existed_job_id)
+    // console.log('existed job id', existed_job_id)
     data["job_status_list"].forEach((job) => {
         if(existed_job_id.includes(job.job_id)){
             known_username_job_list.push(job)
@@ -40,32 +57,63 @@ function synchronizeDB(data, existed_job_id) {
 
     // if size of unknown_username_job_list is not 0
     if(unknown_username_job_list.length > 0){
-        console.log("Insert unknown data")
-        // for those unknown username_job_list, insert them into the db
-        const sql = 'INSERT INTO test_service_stats (username, job_id, status, start_time)';
-        const values = unknown_username_job_list.map((job) => [job.username, job.job_id, job.job_status, job.start_time])
-        const flattenedValues = [].concat.apply([], values);
-        const placeholders = values.map(() => "(?, ?, ?, ?)").join(",");
-        const insert_sql = `${sql} VALUES ${placeholders}`;
-        console.log('insert_sql', insert_sql)
-        console.log('flattenedValues', flattenedValues)
+        // console.log("Insert unknown data")
 
-        db.run(insert_sql, flattenedValues, (err) => {
-            if (err) {
-                console.log(err);
+        // seperate the data into two parts
+        // the job in the first part if its status is Done
+        // the job in the second part if its status is not Done
+        var unknown_username_job_list_done = []
+        var unknown_username_job_list_not_done = []
+        unknown_username_job_list.forEach((job) => {
+            if(job.job_status === "Done"){
+                unknown_username_job_list_done.push(job)
+            } else {
+                unknown_username_job_list_not_done.push(job)
             }
         })
+
+        if(unknown_username_job_list_done.length > 0){
+            insertUnknownJobs(
+                "(username, job_id, status, start_time, solve_time)",
+                "(?, ?, ?, ?, ?)",
+                unknown_username_job_list_done.map(
+                    (job) => [job.username, job.job_id, job.job_status, job.start_time, job.solve_time]
+                )
+            );
+        }
+        
+        if(unknown_username_job_list_not_done.length > 0){
+            insertUnknownJobs(
+                "(username, job_id, status, start_time)",
+                "(?, ?, ?, ?)",
+                unknown_username_job_list_not_done.map(
+                    (job) => [job.username, job.job_id, job.job_status, job.start_time]
+                )
+            )
+        }
+        
     }
 
     if(known_username_job_list.length > 0){
-        console.log("Update known data")
+        // console.log("Update known data")
 
         // FIXME: shouldn't update the data so frequently
 
         // for those known username_job_list, update the db
-        const update_sql = 'UPDATE test_service_stats SET status = ?, start_time = ? WHERE job_id = ?';
         known_username_job_list.forEach((job) => {
-            db.run(update_sql, [job.job_status, job.start_time, job.job_id], (err) => {
+            var solve_time_placeholder;
+            var params;
+            if (job.job_status === "Done") {
+                // get the solve time
+                solve_time_placeholder = ", computation_time_ms = ?" 
+                params = [job.job_status, job.start_time, job.solve_time, job.job_id] 
+            }else{
+                solve_time_placeholder = ""
+                params = [job.job_status, job.start_time, job.job_id]
+            }
+            const update_sql = `UPDATE test_service_stats SET status = ?, start_time = ? ${solve_time_placeholder} WHERE job_id = ?`;
+            
+            db.run(update_sql, params, (err) => {
                 if (err) {
                     console.log(err);
                 }
@@ -85,10 +133,9 @@ function joinDBData(data) {
         const placeholders = job_id_list.map(() => "?").join(",");
         // console.log(placeholders)
         const sql = `select username, job_id from test_service_stats where job_id in (${placeholders})`;
-        db.all(sql, job_id_list, (err, result) => {
+        db.all(sql, job_id_list, async (err, result) => {
             if (err) {
-                console.log("Error fetching data from db")
-                console.log(err);
+                console.log("Error fetching data from db, ", err)
                 reject(err);
             }
 
@@ -106,17 +153,43 @@ function joinDBData(data) {
                     job["username"] = "unknown"
                 }
             })
-            synchronizeDB(data, existed_job_id);
             resolve(data);
+            data = await getSolveTimeForEachJob(data);
+            synchronizeDB(data, existed_job_id);
         })
     })
 }
 
+export async function getSolveTimeForEachJob(data) {
+    await Promise.all(data.job_status_list.map(async (job) => {
+        if (job.job_status === "Done") {
+            const job_id = job.job_id;
+            const solve_time = await getSolveTimeOfJobId(job_id);
+            
+            job.solve_time = solve_time;
+        }
+    }));
+    
+    // console.log("getSolveTimeForEachJob: ", data);
+    return data;
+}
+
+
+/**
+ * The handler function of the jobs api
+ * 
+ * When fetching the endpoint /api/jobs,  the handler will handle the request either it is GET or POST
+ * If the method is GET, the api will return the job list from the Fujitsu server
+ * If the method is POST, the api will delete the job on the Fujitsu server
+ * @param {[Request]} req 
+ * @param {[Response]} res 
+ * @returns 
+ */
 export default async function handler(req, res) {
     return new Promise((resolve, reject) => {
         if (req.method === 'POST') {
             // delete the job
-            console.log('delete job')
+            // console.log('delete job')
             // TODO: check the cookie is valid
             
             deleteJob(req.body.job_id).then((response) => {
@@ -130,11 +203,10 @@ export default async function handler(req, res) {
             })
         } else if (req.method === 'GET') {
             // get the job from fujitsu
-            fetchJobList().then((data) => {
-                return joinDBData(data).then((data) => {
-                    res.status(200).json(data);
-                    resolve();
-                })
+            fetchJobList().then( async (data) => {
+                const data_2 = await joinDBData(data);
+                res.status(200).json(data_2)
+                resolve();
             }).catch((err) => {
                 res.status(500).json({ 'message': err })
                 reject(err)

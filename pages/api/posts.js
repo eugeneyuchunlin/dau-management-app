@@ -1,6 +1,6 @@
 import { ApiError } from 'next/dist/server/api-utils';
 import db from '../../database'
-import { fetchJobList, fetchJobResult } from '../../util/lib/utils';
+import { fetchJobList, fetchJobResult, getSolveTimeOfJobId} from '../../util/lib/utils';
 
 async function getUserName(api_key) {
   const user_sql = 'SELECT username FROM users WHERE api_key = ?';
@@ -58,38 +58,24 @@ async function insertComputationData(username, job_id, job_status) {
 }
 
 
-// get the solution from the Fujitsu API
-async function getSolution(job_id) {
-  try {
+async function updateSolveTime(job_id) {
+  try{
+    const solve_time = await getSolveTimeOfJobId(job_id);
+    // update it into the database
+    const sql = 'UPDATE test_service_stats SET computation_time_ms = ? WHERE job_id = ?';
+    const params = [solve_time, job_id];
 
-    const interval_id = setInterval(async () => {
-      const job_result = await fetchJobResult(job_id);
-      console.log("job_result line 76", job_result)
-
-      if(job_result.status === 'Done'){
-        // job is done
-        // solve time
-        const solve_time = job_result.qubo_solution.timing.solve_time;
-        const sql = 'UPDATE test_service_stats SET computation_time_ms = ?, status = ? WHERE job_id = ?';
-        const params = [solve_time, job_result.status, job_id];
-
-        clearInterval(interval_id);
-        return new Promise((resolve, reject) => {
-          db.run(sql, params, (err) => {
-            if (err) {
-              reject(new Error('Internal Server error'));
-            }
-            resolve();
-          })
-        })
-
-      }
-
-    }, 3000);
-
-  } catch (err) {
-    console.log('Failed to get solution from Fujitsu API')
-    // throw new Error('Error fetching Fujitsu job data: ' + err.message);
+    return new Promise((resolve, reject) => {
+      db.run(sql, params, (err) => {
+        if (err) {
+          reject(new Error('Internal Server error'));
+        }
+        resolve();
+      });
+    });
+  }catch(err){
+    console.log(err.message)
+    throw new Error('Error updating solve time :' + err.message);
   }
 }
 
@@ -114,11 +100,11 @@ export default async function handler(req, res) {
             if(job_status.job_status === 'Done'){
               // get the solution immediately
               console.log("get solution immediately")
-              getSolution(job_id);
+              updateSolveTime(job_id);
             }else{
               // set timer to wait
               console.log("set timer to wait")
-              setTimeout(getSolution, time_limit_sec * 1000, job_id) 
+              setTimeout(updateSolveTime, time_limit_sec * 1000, job_id) 
             }
           }
           res.status(200).json({'message' : 'success'});
