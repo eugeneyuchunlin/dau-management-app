@@ -50,7 +50,6 @@ async function getDataFromDatabase(){
                 console.error(err.message);
                 reject(err);
             }
-            // console.log(rows);
             resolve(rows);
         })
     })

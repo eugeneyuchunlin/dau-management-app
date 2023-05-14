@@ -1,7 +1,8 @@
 import db from "../../database"
 import FUJITSU_API_KEY from "../../config"
+import { URL, RESULT_END_POINT } from "../../common/constants/url"
 
-import { fetchJobList, getSolveTimeOfJobId } from "../../util/lib/utils"
+import { fetchJobList, getSolveTimeAndStatusOfJobId } from "../../util/lib/utils"
 // import {}
 
 /**
@@ -10,8 +11,8 @@ import { fetchJobList, getSolveTimeOfJobId } from "../../util/lib/utils"
  * @returns {[Response]]} response The response of the Fujitsu server of the delete request
  */
 async function deleteJob(job_id) {
-    const url = 'https://api.aispf.global.fujitsu.com';
-    const end_point = '/da/v3/async/jobs/result/' + job_id;
+    const url = URL;
+    const end_point = RESULT_END_POINT + job_id;
     const options = {
         method: 'DELETE',
         headers: {
@@ -24,17 +25,15 @@ async function deleteJob(job_id) {
     return response
 }
 
-function insertUnknownJobs(fields, question_signs, values){
-    const sql = `INSERT INTO test_service_stats`;
-    // const values = data.map((job) => [job.username, job.job_id, job.job_status, job.start_time, job.solve_time])
-    const flattenedValues = [].concat.apply([], values);
-    const placeholders = values.map(() => question_signs).join(",");
-    const insert_sql = `${sql} ${fields} VALUES ${placeholders}`;
-
-    db.run(insert_sql, flattenedValues, (err) => {
-        if (err) {
-            console.log(err);
-        }
+function insertAndUpdateUnknownJobs(data, sql, paramater_generate_function) {
+    console.log("insertAndUpdateUnknownJobs : ",data)
+    data.forEach((job)=>{
+        const params = paramater_generate_function(job);
+        db.run(sql, params, (err) => {
+            if (err) {
+                console.log(err);
+            }
+        })
     })
 }
 
@@ -48,7 +47,7 @@ function synchronizeDB(data, existed_job_id) {
     var known_username_job_list = []
     // console.log('existed job id', existed_job_id)
     data["job_status_list"].forEach((job) => {
-        if(existed_job_id.includes(job.job_id)){
+        if (existed_job_id.includes(job.job_id)) {
             known_username_job_list.push(job)
         } else {
             unknown_username_job_list.push(job)
@@ -56,7 +55,7 @@ function synchronizeDB(data, existed_job_id) {
     })
 
     // if size of unknown_username_job_list is not 0
-    if(unknown_username_job_list.length > 0){
+    if (unknown_username_job_list.length > 0) {
         // console.log("Insert unknown data")
 
         // seperate the data into two parts
@@ -65,36 +64,43 @@ function synchronizeDB(data, existed_job_id) {
         var unknown_username_job_list_done = []
         var unknown_username_job_list_not_done = []
         unknown_username_job_list.forEach((job) => {
-            if(job.job_status === "Done"){
+            if (job.job_status === "Done") {
                 unknown_username_job_list_done.push(job)
             } else {
                 unknown_username_job_list_not_done.push(job)
             }
         })
 
-        if(unknown_username_job_list_done.length > 0){
-            insertUnknownJobs(
-                "(username, job_id, status, start_time, computation_time_ms)",
-                "(?, ?, ?, ?, ?)",
-                unknown_username_job_list_done.map(
-                    (job) => [job.username, job.job_id, job.job_status, job.start_time, job.solve_time]
-                )
-            );
-        }
-        
-        if(unknown_username_job_list_not_done.length > 0){
-            insertUnknownJobs(
-                "(username, job_id, status, start_time)",
-                "(?, ?, ?, ?)",
-                unknown_username_job_list_not_done.map(
-                    (job) => [job.username, job.job_id, job.job_status, job.start_time]
-                )
+        if (unknown_username_job_list_done.length > 0) {
+            insertAndUpdateUnknownJobs(
+                unknown_username_job_list_done,
+                `INSERT INTO test_service_stats 
+                (username, job_id, status, start_time, computation_time_ms) VALUES (?, ?, ?, ?, ?)
+                ON CONFLICT (job_id) DO UPDATE SET username = ?, status = ?, start_time = ?, computation_time_ms = ?`,
+                (job) => [
+                    job.username, job.job_id, job.job_status,
+                    job.start_time, job.solve_time, job.username,
+                    job.job_status, job.start_time, job.solve_time
+                ]
             )
         }
-        
+
+        if (unknown_username_job_list_not_done.length > 0) {
+            insertAndUpdateUnknownJobs(
+                unknown_username_job_list_not_done,
+                `INSERT INTO test_service_stats
+                (username, job_id, status, start_time) VALUES (?, ?, ?, ?)
+                ON CONFLICT (job_id) DO UPDATE SET username = ?, status = ?, start_time = ?`,
+                (job) => [
+                    job.username, job.job_id, job.job_status,
+                    job.start_time, job.username, job.job_status, job.start_time
+                ]
+            ) 
+        }
+
     }
 
-    if(known_username_job_list.length > 0){
+    if (known_username_job_list.length > 0) {
         // console.log("Update known data")
 
         // FIXME: shouldn't update the data so frequently
@@ -105,14 +111,14 @@ function synchronizeDB(data, existed_job_id) {
             var params;
             if (job.job_status === "Done") {
                 // get the solve time
-                solve_time_placeholder = ", computation_time_ms = ?" 
-                params = [job.job_status, job.start_time, job.solve_time, job.job_id] 
-            }else{
+                solve_time_placeholder = ", computation_time_ms = ?"
+                params = [job.job_status, job.start_time, job.solve_time, job.job_id]
+            } else {
                 solve_time_placeholder = ""
                 params = [job.job_status, job.start_time, job.job_id]
             }
             const update_sql = `UPDATE test_service_stats SET status = ?, start_time = ? ${solve_time_placeholder} WHERE job_id = ?`;
-            
+
             db.run(update_sql, params, (err) => {
                 if (err) {
                     console.log(err);
@@ -164,12 +170,12 @@ export async function getSolveTimeForEachJob(data) {
     await Promise.all(data.job_status_list.map(async (job) => {
         if (job.job_status === "Done") {
             const job_id = job.job_id;
-            const solve_time = await getSolveTimeOfJobId(job_id);
-            
+            const { solve_time, status } = await getSolveTimeAndStatusOfJobId(job_id);
+
             job.solve_time = solve_time;
         }
     }));
-    
+
     // console.log("getSolveTimeForEachJob: ", data);
     return data;
 }
@@ -191,7 +197,7 @@ export default async function handler(req, res) {
             // delete the job
             // console.log('delete job')
             // TODO: check the cookie is valid
-            
+
             deleteJob(req.body.job_id).then((response) => {
                 // console.log(response);
                 res.status(response.status).json({ message: 'Delete successfully' })
@@ -203,7 +209,7 @@ export default async function handler(req, res) {
             })
         } else if (req.method === 'GET') {
             // get the job from fujitsu
-            fetchJobList().then( async (data) => {
+            fetchJobList().then(async (data) => {
                 const data_2 = await joinDBData(data);
                 res.status(200).json(data_2)
                 resolve();

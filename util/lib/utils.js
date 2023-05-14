@@ -1,8 +1,9 @@
 import FUJITSU_API_KEY from "../../config";
+import { URL, RESULT_END_POINT, JOBS_END_POINT } from "../../common/constants/url"
 
 export async function fetchJobList() {
-    const url = 'https://api.aispf.global.fujitsu.com';
-    const end_point = '/da/v3/async/jobs';
+    const url = URL;
+    const end_point = JOBS_END_POINT;
     const options = {
         method: 'GET',
         headers: {
@@ -32,8 +33,8 @@ export async function fetchJobList() {
 }
 
 export async function fetchJobResult(job_id) {
-    const url = 'https://api.aispf.global.fujitsu.com';
-    const end_point = '/da/v3/async/jobs/result/' + job_id;
+    const url = URL;
+    const end_point = RESULT_END_POINT + job_id;
     const options = {
         method: 'GET',
         headers: {
@@ -67,7 +68,7 @@ export const daysInCurrentMonth = () => {
 }
 
 // get the solution from the Fujitsu API
-export async function getSolveTimeOfJobId(job_id) {
+export async function getSolveTimeAndStatusOfJobId(job_id) {
     return new Promise((resolve, reject) => {
         try {
   
@@ -78,7 +79,20 @@ export async function getSolveTimeOfJobId(job_id) {
               // job is done
   
               clearInterval(interval_id);
-              resolve(job_result.qubo_solution.timing.solve_time) 
+              console.log("job_result : ", job_result);
+
+              resolve({
+                solve_time : job_result.qubo_solution.timing.solve_time,
+                status : job_result.status
+              })
+            }else if (job_result.status === 'Cancled'){
+                // job is cancled
+                console.log("job_id", job_id, " is cancled" )
+                clearInterval(interval_id);
+                resolve({
+                    solve_time : null,
+                    status : job_result.status
+                })
             }
   
           }, 3000);
