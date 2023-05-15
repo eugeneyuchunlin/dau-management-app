@@ -27,7 +27,7 @@ export default function Nvbar({data}) {
     <>
       <Navbar bg="light" variant="light" >
         <Container>
-          <Navbar.Brand href="/">Project Name</Navbar.Brand>
+          <Navbar.Brand href="/">DAU Management App</Navbar.Brand>
           <Nav className="me-auto">
             <Nav.Link href="/jobs">Alive Job List</Nav.Link>
             <Nav.Link href="/history">History</Nav.Link>

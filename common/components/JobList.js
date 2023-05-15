@@ -20,7 +20,9 @@ function Entry({ index, data, isLoggedIn }) {
 
     const deleteMessageModalCloseHandler = () => {
         setShowDeleteMessageModal(false);
-        setIsVisiable(false);
+        if(jobStatus === 'Deleted'){
+            setIsVisiable(false);
+        }
     }
 
 
@@ -43,6 +45,7 @@ function Entry({ index, data, isLoggedIn }) {
             .then((data) => {
                 console.log(data) 
                 setDeleteMessage(data.message)
+                setJobStatus(data.status)
                 setShowDeleteMessageModal(true);
             })
     }
@@ -63,6 +66,7 @@ function Entry({ index, data, isLoggedIn }) {
         }
         fetch(endpoint, options).then((response) => response.json()).then((data) => {
             console.log(data);
+            setJobStatus(data.status);
             if(data.status === 'Canceled'){
                 setDeleteMessage("The job has been canceled successfully.");
             }else if(data.status === 'Done'){
@@ -91,7 +95,7 @@ function Entry({ index, data, isLoggedIn }) {
                 {
                     (() => {
                         if (isLoggedIn) {
-                            console.log("jobStatus : ", jobStatus)
+                            // console.log("jobStatus : ", jobStatus)
                             if (jobStatus === 'Waiting') {
                                 return <td><Button variant="outline-warning" onClick={deleteBtnHandler}>Cancel</Button></td>
                             }else {

@@ -205,8 +205,10 @@ export default async function handler(req, res) {
 
             deleteJob(req.body.job_id).then(async (response) => {
                 const data = await response.json();
-                // console.log("data : ", data); 
-                res.status(response.status).json({ message: data.message })
+                res.status(response.status).json({ 
+                    status : data.status,
+                    message: data.message
+                })
                 resolve();
             }).catch((err) => {
                 console.log(err)
