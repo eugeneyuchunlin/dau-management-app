@@ -6,6 +6,7 @@
 export const URL = "http://localhost:3000";
 export const RESULT_END_POINT = "/api/result/";
 export const JOBS_END_POINT = "/api/jobs";
+export const CANCEL_END_POINT = "/api/jobs/cancel";
 
 export default function url() {
     return (<></>)

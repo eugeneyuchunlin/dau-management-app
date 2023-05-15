@@ -21,8 +21,13 @@ async function deleteJob(job_id) {
             "X-Api-Key": FUJITSU_API_KEY
         }
     }
-    const response = await fetch(url + end_point, options);
-    return response
+    return new Promise((resolve, reject) => {
+        fetch(url + end_point, options).then((response) => {
+            resolve(response)
+        }).catch((err) => {
+            reject(err)
+        })
+    })
 }
 
 function insertAndUpdateUnknownJobs(data, sql, paramater_generate_function) {
@@ -198,9 +203,10 @@ export default async function handler(req, res) {
             // console.log('delete job')
             // TODO: check the cookie is valid
 
-            deleteJob(req.body.job_id).then((response) => {
-                // console.log(response);
-                res.status(response.status).json({ message: 'Delete successfully' })
+            deleteJob(req.body.job_id).then(async (response) => {
+                const data = await response.json();
+                // console.log("data : ", data); 
+                res.status(response.status).json({ message: data.message })
                 resolve();
             }).catch((err) => {
                 console.log(err)

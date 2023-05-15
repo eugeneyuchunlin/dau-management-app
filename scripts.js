@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const { copyFileSync } = require('fs');
+const { promiseHooks } = require('v8');
 const sqlite3 = require('sqlite3').verbose()
 
 const db = new sqlite3.Database('./database.db', (err) => {
@@ -182,9 +183,46 @@ async function postRequest(job_id, api_key, solve_time){
 
 async function solveAndPostRequest(user, time_limit_sec){
 
-    const job_id = await solveRequest(time_limit_sec);
-    console.log("job_id : ", job_id)
-    const api_key = await getTheAPIKey(user);
-    console.log("api_key : ", api_key);
-    await postRequest(job_id, api_key, time_limit_sec); 
+    return new Promise( async (resolve, reject) => {
+        const job_id = await solveRequest(time_limit_sec);
+        console.log("job_id : ", job_id)
+        const api_key = await getTheAPIKey(user);
+        console.log("api_key : ", api_key);
+        await postRequest(job_id, api_key, time_limit_sec);
+        resolve(job_id)
+    })
 }
+
+async function cancelTheJobRequest(job_id){
+    return new Promise((resolve, reject) => {
+        const url = "http://localhost:3000";
+        const end_point = "/api/jobs/cancel";
+
+        console.log("job_id : ", job_id)
+
+        fetch(url + end_point, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                job_id: job_id,
+            })
+        }).then((response) => {
+            return response.json();
+        }).then((data) => {
+            console.log(data);
+            resolve(data);
+        }).catch((err) => {
+            reject(err);
+        })
+    })
+}
+
+// const job_id = solveAndPostRequest('Chun', 10);
+
+// solveAndPostRequest('Chun', 10).then((job_id) => {
+//     setTimeout(cancelTheJobRequest, 2000, job_id);
+// })
+
+solveAndPostRequest('Chun', 10)
