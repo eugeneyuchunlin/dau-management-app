@@ -5,6 +5,7 @@ import { LoginProvider } from '../common/contexts/LoginContext';
 import { Container, Row, Col} from 'react-bootstrap';
 import PieChart from '../common/components/PieChart';
 import LineChart from '../common/components/LineChart'
+import Footer from '../common/components/Footer'
 
 import { daysInCurrentMonth, daysInTheMonth } from '../util/lib/utils';
 
@@ -36,6 +37,7 @@ export default function HomePage(props){
                     </Col>
                 </Row>
             </Container>
+            <Footer />
         </>
     )
 

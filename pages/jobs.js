@@ -4,7 +4,7 @@ import JobList from '../common/components/JobList.js';
 import { LoginProvider } from '../common/contexts/LoginContext';
 
 import { Container, Row, Col } from 'react-bootstrap';
-
+import Footer from '../common/components/Footer'
 
 
 
@@ -15,18 +15,24 @@ export default function JobsPage() {
         <>
             <LoginProvider>
                 <Nvbar />
-                <Container style={{
-                    marginTop: "50px",
-                    marginBottom: "50px",
+                <div style={{
+                    flexGrow : "1"
                 }}>
-                    <Row>
-                        <Col>
-                            <JobList/>
-                        </Col>
-                    </Row>
-                </Container>
-            </LoginProvider>
+                    <Container style={{
+                        marginTop: "50px",
+                        marginBottom: "50px",
+                        minHeight: "75vh"
+                    }}>
+                        <Row>
+                            <Col>
+                                <JobList/>
+                            </Col>
+                        </Row>
+                    </Container>
 
+                <Footer />
+                </div>
+            </LoginProvider>
         </>
     )
 

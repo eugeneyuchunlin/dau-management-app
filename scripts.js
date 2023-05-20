@@ -133,7 +133,7 @@ async function addUnknownJobs(solve_time) {
 
 async function solveRequest(time_limit_sec){
     return new Promise((resolve, reject) => {
-        const url = "http://localhost:3000";
+        const url = "http://127.0.0.1:3000";
         const end_point = "/api/solve";
 
         fetch(url + end_point, {
@@ -157,7 +157,7 @@ async function solveRequest(time_limit_sec){
 
 async function postRequest(job_id, api_key, solve_time){
     return new Promise((resolve, reject) => {
-        const url = "http://localhost:3001";
+        const url = "http://127.0.0.1:3001";
         const end_point = "/api/posts";
 
         fetch(url + end_point, {
@@ -195,7 +195,7 @@ async function solveAndPostRequest(user, time_limit_sec){
 
 async function cancelTheJobRequest(job_id){
     return new Promise((resolve, reject) => {
-        const url = "http://localhost:3000";
+        const url = "http://127.0.0.1:3000";
         const end_point = "/api/jobs/cancel";
 
         console.log("job_id : ", job_id)
@@ -254,12 +254,12 @@ async function getJobsRequest() {
 
 // Post request to testing server /api/solve
 // Post request to DAU-management server /api/posts
-// solveAndPostRequest('Chun', 10)
+solveAndPostRequest('Chun', 5)
 // const username = process.argv[2];
 // const time = process.argv[3];
 
 // solveAndPostRequest(username, time);
 
-getJobsRequest().then((data) => {
-    console.log(data);
-})
+// getJobsRequest().then((data) => {
+//     console.log(data);
+// })

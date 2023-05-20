@@ -3,6 +3,7 @@ import { LoginProvider } from "../common/contexts/LoginContext"
 
 import { Col, Row, Container } from "react-bootstrap";
 import HistoryTable from "../common/components/HistoryTable";
+import Footer from '../common/components/Footer'
 
 import db from '../database'
 
@@ -15,6 +16,9 @@ export default function HistoryPage({data}) {
             <LoginProvider>
                 <Nvbar />
             </LoginProvider>
+            <div style={{
+                flexGrow : "1"
+            }}>
             <Container
                 fluid="xl"
                 style={{
@@ -29,6 +33,8 @@ export default function HistoryPage({data}) {
                    </Row>
 
             </Container>
+            <Footer />
+            </div>
         </>
     )
 }

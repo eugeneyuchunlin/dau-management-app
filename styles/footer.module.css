@@ -1,0 +1,8 @@
+.footer_content{
+    background-color: lightgrey;
+    color: black;
+    text-align: center;
+    padding: 1rem;
+    margin-top: 1rem;
+    min-height: 10vh;
+}
