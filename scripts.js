@@ -219,10 +219,47 @@ async function cancelTheJobRequest(job_id){
     })
 }
 
+async function getJobsRequest() {
+    return new Promise((resolve, reject) => {
+      const url = "http://127.0.0.1:3000/api/jobs";
+      fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then((data) => {
+          console.log(data);
+          resolve(data);
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+          reject(error);
+        });
+    });
+  }
+  
+
 // const job_id = solveAndPostRequest('Chun', 10);
 
 // solveAndPostRequest('Chun', 10).then((job_id) => {
 //     setTimeout(cancelTheJobRequest, 2000, job_id);
 // })
 
-solveAndPostRequest('Chun', 10)
+// Post request to testing server /api/solve
+// Post request to DAU-management server /api/posts
+// solveAndPostRequest('Chun', 10)
+// const username = process.argv[2];
+// const time = process.argv[3];
+
+// solveAndPostRequest(username, time);
+
+getJobsRequest().then((data) => {
+    console.log(data);
+})
