@@ -57,7 +57,7 @@ export default function LineChart({daily_data}) {
     // console.log("daily data : ", daily_data);
 
     const days_in_month = daysInCurrentMonth();
-    const current_month = new Date().getMonth() + 1;
+    const current_month = new Date().getUTCMonth() + 1;
 
     const labels = []
     for (var i = 1; i <= days_in_month; i++) {

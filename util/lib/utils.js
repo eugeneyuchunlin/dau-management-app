@@ -25,9 +25,15 @@ export async function fetchJobList() {
     // return the data
     data.job_status_list.forEach((job) => {
         const date = new Date(job.start_time);
-        date.setUTCHours(date.getUTCHours() + 8)
+        date.setUTCHours(date.getUTCHours())
+
+        const date_utc = new Date(job.start_time);
+        date_utc.setUTCHours(date_utc.getUTCHours() + 8)
+
+        const dateUTCDateTimeString = date_utc.toISOString().replace("T", " ").replace("Z", "");
         const newDatetimeString = date.toISOString().replace("T", " ").replace("Z", "");
         job.start_time = newDatetimeString;
+        job.start_time_utc8 = dateUTCDateTimeString;
     })
     return data;
 }
@@ -61,8 +67,8 @@ export const daysInTheMonth = (year, month) => {
 
 export const daysInCurrentMonth = () => {
     const current_date = new Date();
-    const current_year = current_date.getFullYear();
-    let current_month = current_date.getMonth() + 1;
+    const current_year = current_date.getUTCFullYear();
+    let current_month = current_date.getUTCMonth() + 1;
 
     return daysInTheMonth(current_year, current_month);
 }
@@ -73,27 +79,28 @@ export async function getSolveTimeAndStatusOfJobId(job_id) {
         try {
   
           const interval_id = setInterval(async () => {
-            const job_result = await fetchJobResult(job_id);
-  
-            if(job_result.status === 'Done'){
-              // job is done
-  
-              clearInterval(interval_id);
-              console.log("job_result : ", job_result);
+            fetchJobResult(job_id).then((job_result) => {
+                if(job_result.status === 'Done'){
+                  // job is done
+                  clearInterval(interval_id);
 
-              resolve({
-                solve_time : job_result.qubo_solution.timing.solve_time,
-                status : job_result.status
-              })
-            }else if (job_result.status === 'Cancled'){
-                // job is cancled
-                console.log("job_id", job_id, " is cancled" )
-                clearInterval(interval_id);
-                resolve({
-                    solve_time : null,
+                  resolve({
+                    solve_time : job_result.qubo_solution.timing.solve_time,
                     status : job_result.status
-                })
-            }
+                  })
+                }else if (job_result.status === 'Cancled'){
+                    // job is cancled
+                    console.log("job_id", job_id, " is cancled" )
+                    clearInterval(interval_id);
+                    resolve({
+                        solve_time : null,
+                        status : job_result.status
+                    })
+                }
+            }).catch((err) => {
+                clearInterval(interval_id);
+                console.log("err : ", err)
+            })
   
           }, 3000);
   

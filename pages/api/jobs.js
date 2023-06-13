@@ -81,11 +81,11 @@ function synchronizeDB(data, existed_job_id) {
                 unknown_username_job_list_done,
                 `INSERT INTO test_service_stats 
                 (username, job_id, status, start_time, computation_time_ms) VALUES (?, ?, ?, ?, ?)
-                ON CONFLICT (job_id) DO UPDATE SET username = ?, status = ?, start_time = ?, computation_time_ms = ?`,
+                ON CONFLICT (job_id) DO UPDATE SET username = ?, status = ?, start_time = ?, start_time_utc8 = ?, computation_time_ms = ?`,
                 (job) => [
                     job.username, job.job_id, job.job_status,
                     job.start_time, job.solve_time, job.username,
-                    job.job_status, job.start_time, job.solve_time
+                    job.job_status, job.start_time, job.start_time_utc8, job.solve_time
                 ]
             )
         }
@@ -95,10 +95,10 @@ function synchronizeDB(data, existed_job_id) {
                 unknown_username_job_list_not_done,
                 `INSERT INTO test_service_stats
                 (username, job_id, status, start_time) VALUES (?, ?, ?, ?)
-                ON CONFLICT (job_id) DO UPDATE SET username = ?, status = ?, start_time = ?`,
+                ON CONFLICT (job_id) DO UPDATE SET username = ?, status = ?, start_time = ?, start_time_utc8 = ?`,
                 (job) => [
                     job.username, job.job_id, job.job_status,
-                    job.start_time, job.username, job.job_status, job.start_time
+                    job.start_time, job.username, job.job_status, job.start_time, job.start_time_utc8
                 ]
             ) 
         }
@@ -117,12 +117,12 @@ function synchronizeDB(data, existed_job_id) {
             if (job.job_status === "Done") {
                 // get the solve time
                 solve_time_placeholder = ", computation_time_ms = ?"
-                params = [job.job_status, job.start_time, job.solve_time, job.job_id]
+                params = [job.job_status, job.start_time, job.start_time_utc8, job.solve_time, job.job_id]
             } else {
                 solve_time_placeholder = ""
-                params = [job.job_status, job.start_time, job.job_id]
+                params = [job.job_status, job.start_time, job.start_time_utc8, job.job_id]
             }
-            const update_sql = `UPDATE test_service_stats SET status = ?, start_time = ? ${solve_time_placeholder} WHERE job_id = ?`;
+            const update_sql = `UPDATE test_service_stats SET status = ?, start_time = ?, start_time_utc8 = ? ${solve_time_placeholder} WHERE job_id = ?`;
 
             db.run(update_sql, params, (err) => {
                 if (err) {
@@ -205,6 +205,17 @@ export default async function handler(req, res) {
 
             deleteJob(req.body.job_id).then(async (response) => {
                 const data = await response.json();
+                if(data.status === 'Deleted'){
+                    data.message = 'delete successfully'
+                }else if(data.status === 'Running'){
+                    data.message = 'job is running'
+                }else if(data.status === 'Canceled'){
+                    data.message = 'job is canceled'
+                }else if(data.status === 'Waiting'){
+                    data.message = 'job is waiting'
+                }else if(data.status === undefined){
+                    data.message = 'Unknown status'
+                }
                 res.status(response.status).json({ 
                     status : data.status,
                     message: data.message

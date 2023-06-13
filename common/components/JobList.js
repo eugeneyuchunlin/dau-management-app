@@ -91,6 +91,7 @@ function Entry({ index, data, isLoggedIn }) {
                 <td>{data.job_id}</td>
                 <td>{data.username}</td>
                 <td>{jobStatus}</td>
+                <td>{data.start_time_utc8}</td>
                 <td>{data.start_time}</td>
                 {
                     (() => {
@@ -149,8 +150,12 @@ export default function JobList({ data }) {
                 .then((response) => response.json())
                 .then((data) => {
                     console.log('data : ', data["job_status_list"])
-                    setJobs(data["job_status_list"])
-                    setJobsString(JSON.stringify(data))
+                    // sort the job_status_list by start_time
+
+                    const sorted_data = data["job_status_list"].sort((a, b) => {
+                        return new Date(b.start_time) - new Date(a.start_time);
+                    })
+                    setJobs(sorted_data)
                 }).catch((err) => {
                     console.log('Error fetching jobs ', err)
                 })
@@ -176,14 +181,14 @@ export default function JobList({ data }) {
                         <th>Job Id</th>
                         <th>User</th>
                         <th>Job Status</th>
-                        <th>Start time</th>
+                        <th>Start time(UTC+8)</th>
+                        <th>Start time(UTC+0)</th>
                         {isLoggedIn && <th>Delete</th>}
                     </tr>
                 </thead>
                 <tbody>
                     {jobs && jobs.map((job, index) => {
                         return <Entry key={index} data={job} index={index} isLoggedIn={isLoggedIn} />
-
                     })}
                 </tbody>
             </Table>

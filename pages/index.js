@@ -56,8 +56,8 @@ export async function getStaticProps(){
 async function getDailyDataFromDatabase(){
     // get the number of days in the current month
     const current_date = new Date();
-    const current_year = current_date.getFullYear();
-    let current_month = current_date.getMonth() + 1;
+    const current_year = current_date.getUTCFullYear();
+    let current_month = current_date.getUTCMonth() + 1;
 
     const days_in_month = daysInCurrentMonth(current_year, current_month);
 
@@ -126,8 +126,8 @@ async function getDailyDataFromDatabase(){
 async function getDataFromDatabase(){
     // get the current month and days
     const current_date = new Date();
-    const current_year = current_date.getFullYear();
-    let current_month = current_date.getMonth() + 1;
+    const current_year = current_date.getUTCFullYear();
+    let current_month = current_date.getUTCMonth() + 1;
 
     const days_in_month = daysInTheMonth(current_year, current_month);
 

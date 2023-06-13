@@ -254,7 +254,7 @@ async function getJobsRequest() {
 
 // Post request to testing server /api/solve
 // Post request to DAU-management server /api/posts
-solveAndPostRequest('Chun', 5)
+// solveAndPostRequest('Chun', 5)
 // const username = process.argv[2];
 // const time = process.argv[3];
 
@@ -263,3 +263,7 @@ solveAndPostRequest('Chun', 5)
 // getJobsRequest().then((data) => {
 //     console.log(data);
 // })
+
+getTheAPIKey('Chun').then((api_key) => {
+    console.log(api_key);
+})
