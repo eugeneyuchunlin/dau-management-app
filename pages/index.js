@@ -43,7 +43,7 @@ export default function HomePage(props){
 
 }
 
-export async function getStaticProps(){
+export async function getServerSideProps(){
     const data = await getDataFromDatabase();
     const daily_data = await getDailyDataFromDatabase();
     return {
