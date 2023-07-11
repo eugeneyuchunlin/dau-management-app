@@ -5,7 +5,7 @@ import { backgroundColor, borderColor } from '../constants/colors.js';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-export default function PieChart({ data }) {
+export default function PieChart({ data, year, month }) {
     const graph_data = {
         labels: data.map((item) => item.username),
         datasets: [
@@ -21,6 +21,23 @@ export default function PieChart({ data }) {
     const options = {
         responsive: true,
         maintainAspectRatio: false, // set to false to allow adjusting chart size
+        plugins: {
+            legend: {
+                position: "bottom",
+                labels: {
+                    font: {
+                        size: 18,
+                    }
+                }
+            },
+            title: {
+                display: true,
+                text: `${year}-${month}`,
+                font: {
+                    size: 20,
+                }
+            }
+        }
     };
     
     return (

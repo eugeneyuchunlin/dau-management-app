@@ -38,24 +38,29 @@ export default function HomePage(props){
     
 
     const [show, setShow] = useState(true);
-    const [month, setMonth] = useState(monthlyData[monthlyData.length - 1].start_time);
-   
+    const [interval, setInterval] = useState(monthlyData[monthlyData.length - 1].start_time);
+    const [year, setYear] = useState(interval.split('-')[0]);
+    const [month, setMonth] = useState(interval.split('-')[1]);
     
     
-    const handleChooseMonth = (month) => {
-        setMonth(month)
+    const handleChooseMonth = (time) => {
+        setInterval(time)
+        setYear(time.split('-')[0]);
+        setMonth(time.split('-')[1]);
     }
 
     useEffect(()=>{
         // console.log("month : ", month)
-        updateData(month.split('-')[0], month.split('-')[1]).then((data) => {
+        updateData(interval.split('-')[0], interval.split('-')[1]).then((data) => {
             setData(data.data);
             setDailyData(data.daily_data);
         }).catch((err) => {
             console.log(err.message);
         })
 
-    }, [month])
+        setYear(interval.split('-')[0]);
+        setMonth(interval.split('-')[1]);
+    }, [interval])
 
     return (
         <>
@@ -67,7 +72,7 @@ export default function HomePage(props){
             <Container className={styles.main_container}>
                 <Row className={styles.row_block}>
                     <Col sm={8} className={styles.block}>
-                        <PieChart data={data}/>
+                        <PieChart data={data} year={year} month={month}/>
                     </Col>
                     <Col className={styles.block}>
                         <Use data={data}/>
@@ -75,7 +80,7 @@ export default function HomePage(props){
                 </Row>
                 <Row className={styles.row_block}>
                     <Col className={styles.block}>
-                        <LineChart daily_data={dailyData} year={month.split('-')[0]} month={month.split('-')[1]} />
+                        <LineChart daily_data={dailyData} year={year} month={month} />
                     </Col>
                 </Row>
             </Container>
