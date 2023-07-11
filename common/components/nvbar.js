@@ -8,6 +8,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import LoginContext from '../contexts/LoginContext';
 import LoginModal from './LoginModal';
 import styles from '../../styles/Nvbar.module.css'
+import { OffcanvasProvider } from '../contexts/OffcanvasContext';
 
 // keep in mind
 // the nvbar will be re-render when the context is changed
@@ -16,7 +17,7 @@ export default function Nvbar({month, children}) {
 
   const { username, isLoggedIn, logout} = useContext(LoginContext);
   const [ showModal, setShowModal ]= useState(false);
-  const [ showOffcanvas, setShowOffcanvas ] = useState(true);
+  const [ showOffcanvas, setShowOffcanvas ] = useState(false);
 
   const onLogoutClickHandler = () => {
     logout();
@@ -25,6 +26,7 @@ export default function Nvbar({month, children}) {
   
   const showLoginModalHandler = () => setShowModal(true);
   const hideLoginModalHandler = () => setShowModal(false);
+  
 
   // const showOffcanvasHandler = () => setShowOffcanvas(true);
   // const hideOffcanvasHandler = () => setShowOffcanvas(false);
@@ -61,7 +63,9 @@ export default function Nvbar({month, children}) {
         </Offcanvas.Header>
         <Offcanvas.Body>
           <hr/>
-          {children}
+          <OffcanvasProvider onHide={()=>setShowOffcanvas(false)}>
+            {children}
+          </OffcanvasProvider>
           {/* {offcanvas_body} */}
         </Offcanvas.Body>
       </Offcanvas>      
