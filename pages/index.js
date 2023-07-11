@@ -12,23 +12,7 @@ import styles from '../styles/Index.module.css'
 
 import { daysInCurrentMonth, daysInTheMonth} from '../util/lib/utils';
 
-
-
-export default function HomePage(props){
-    // const data = props.data
-    // const daily_data = props.daily_data;
-    // const month_data = props.month_data;
-
-    const [data, setData] = useState(props.data);
-    const [dailyData, setDailyData] = useState(props.daily_data);
-    const [monthlyData, setMonthlyData] = useState(props.month_data);
-    
-    // console.log(monthlyData)
-
-    const [show, setShow] = useState(true);
-    const [month, setMonth] = useState(monthlyData[0].start_time);
-   
-    const updateData = async (year, month) => {
+const updateData = async (year, month) => {
         const response = await fetch(`/api/statistic?year=${year}&month=${month}`, {
             method: 'GET',
             headers: {
@@ -45,6 +29,18 @@ export default function HomePage(props){
             }
         })
     }
+
+export default function HomePage(props){
+
+    const [data, setData] = useState(props.data);
+    const [dailyData, setDailyData] = useState(props.daily_data);
+    const [monthlyData, setMonthlyData] = useState(props.month_data);
+    
+
+    const [show, setShow] = useState(true);
+    const [month, setMonth] = useState(monthlyData[monthlyData.length - 1].start_time);
+   
+    
     
     const handleChooseMonth = (month) => {
         setMonth(month)
@@ -87,6 +83,7 @@ export default function HomePage(props){
         </>
     )
 }
+
 
 
 export async function getServerSideProps(){
