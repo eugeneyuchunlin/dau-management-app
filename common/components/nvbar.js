@@ -1,36 +1,44 @@
 import React, { useContext, useState } from 'react'
 import Container from 'react-bootstrap/Container';
+import { Offcanvas } from 'react-bootstrap';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 import LoginContext from '../contexts/LoginContext';
 import LoginModal from './LoginModal';
+import styles from '../../styles/Nvbar.module.css'
 
 // keep in mind
 // the nvbar will be re-render when the context is changed
 // TODO: prevent re-rendering
-export default function Nvbar({data}) {
+export default function Nvbar({month, children}) {
 
   const { username, isLoggedIn, logout} = useContext(LoginContext);
-  const [ show, setShow ]= useState(false);
+  const [ showModal, setShowModal ]= useState(false);
+  const [ showOffcanvas, setShowOffcanvas ] = useState(true);
 
   const onLogoutClickHandler = () => {
     logout();
   }
 
   
-  const showLoginModalHandler = () => setShow(true);
-  const hideLoginModalHandler = () => setShow(false);
+  const showLoginModalHandler = () => setShowModal(true);
+  const hideLoginModalHandler = () => setShowModal(false);
 
+  // const showOffcanvasHandler = () => setShowOffcanvas(true);
+  // const hideOffcanvasHandler = () => setShowOffcanvas(false);
+  console.log(month)
   return (
     <>
-      <Navbar bg="light" variant="light" >
+      <Navbar bg="light" variant="light" className={styles.nvbar}>
         <Container>
           <Navbar.Brand href="/">DAU Management App</Navbar.Brand>
           <Nav className="me-auto">
+            { month ? <Nav.Link onClick={()=>setShowOffcanvas(true)}>Month</Nav.Link> : <></>}
             <Nav.Link href="/jobs">Alive Job List</Nav.Link>
             <Nav.Link href="/history">History</Nav.Link>
+            <Nav.Link href="/doc">Doc</Nav.Link>
           </Nav>
           <Navbar.Collapse className="justify-content-end">
             {isLoggedIn ? (
@@ -47,7 +55,18 @@ export default function Nvbar({data}) {
         </Container>
       </Navbar>
 
-      <LoginModal show={show} handleClose={hideLoginModalHandler} />
+      <Offcanvas show={showOffcanvas} onHide={()=>{setShowOffcanvas(false)}}>
+        <Offcanvas.Header closeButton>
+          <Offcanvas.Title>Month</Offcanvas.Title>
+        </Offcanvas.Header>
+        <Offcanvas.Body>
+          <hr/>
+          {children}
+          {/* {offcanvas_body} */}
+        </Offcanvas.Body>
+      </Offcanvas>      
+
+      <LoginModal show={showModal} handleClose={hideLoginModalHandler} />
     </>
   );
 }

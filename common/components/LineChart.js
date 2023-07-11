@@ -34,7 +34,7 @@ export const options = {
         },
         title: {
             display: true,
-            text: 'Daily Usage',
+            text: 'Used',
         },
     },
     scales: {
@@ -53,15 +53,13 @@ export const options = {
     }
 };
 
-export default function LineChart({daily_data}) {
+export default function LineChart({daily_data, year, month}) {
     // console.log("daily data : ", daily_data);
-
-    const days_in_month = daysInCurrentMonth();
-    const current_month = new Date().getUTCMonth() + 1;
+    const days_in_month = daysInTheMonth(year, month);
 
     const labels = []
     for (var i = 1; i <= days_in_month; i++) {
-        labels.push(current_month + '/' + i);
+        labels.push(month + '/' + i);
     }
 
     const data = {

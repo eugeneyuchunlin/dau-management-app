@@ -1,0 +1,11 @@
+.month_block{
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 1rem;
+    cursor: pointer;
+}
+
+.month_block:hover{
+    box-shadow: 0 0 5px #ccc;
+}

@@ -112,6 +112,110 @@ export async function getSolveTimeAndStatusOfJobId(job_id) {
     
   }
 
+export async function getDailyDataFromDatabase(db, year, month){
+
+    const days_in_month = daysInTheMonth(year, month);
+
+    // make the the current_month is 2 digits
+    if(month < 10){
+        month = '0' + month;
+    }
+
+    const sql = `SELECT username, DATE(start_time) AS start_time, SUM(computation_time_ms) AS daily_computation_time 
+    FROM test_service_stats WHERE start_time >= '${year}-${month}-01 00:00:00' AND start_time <= '${year}-${month}-${days_in_month} 23:59:59' GROUP BY username, date(start_time)`
+
+    // console.log(sql);
+
+    return new Promise((resolve, reject) => {
+        db.all(sql, [], (err, rows) => {
+            if(err){
+                console.error(err.message);
+                reject(err);
+            }
+            // console.log("rows : ", rows);
+            
+            const daily_data = [];
+            const user_data = {}
+
+            for(var i = 0; i < rows.length; ++i){
+                const row = rows[i];
+                if(!(row.username in user_data)){
+                    user_data[row.username] = [];
+                }
+                user_data[row.username].push(row)
+            }
+            
+            // console.log(user_data)
+
+            for(const username in user_data){
+                const user_daily_data = {};
+                user_daily_data['username'] = username;
+                user_daily_data['data'] = [];
+
+                const user_rows = user_data[username];
+                var date = 1;
+                for(var i = 0; i < user_rows.length; ++i){
+                    // get the date of user_rows[i].start_time
+                    const row = user_rows[i];
+                    const row_date = new Date(row.start_time).getDate();
+                    // console.log("row_date : ", row_date);
+                    while(date < row_date){
+                        user_daily_data['data'].push(0)
+                        date += 1;
+                    }
+                    user_daily_data['data'].push(row.daily_computation_time / 60000);
+                    date += 1;
+                }
+                while(date <= days_in_month){
+                    user_daily_data['data'].push(0);
+                    date += 1;
+                }
+                daily_data.push(user_daily_data);
+            }
+            // console.log(daily_data)
+            resolve(daily_data);
+        })
+    })
+}
+
+export async function getDataFromDatabase(db, year, month){
+
+    const days_in_month = daysInTheMonth(year, month);
+
+    // make the the current_month is 2 digits
+    if(month < 10){
+        month = '0' + month;
+    }
+
+    // query the database for the data in the current month
+    const sql = `SELECT username, SUM(computation_time_ms) AS total_time 
+    FROM test_service_stats WHERE start_time >= '${year}-${month}-01 00:00:00' AND start_time <= '${year}-${month}-${days_in_month} 23:59:59'
+    GROUP BY username;`
+
+    return new Promise((resolve, reject) => {
+        db.all(sql, [], (err, rows) => {
+            if(err){
+                console.error(err.message);
+                reject(err);
+            }
+            // console.log(rows);
+            // sum of total_time 
+            const sum = rows.reduce((acc, item) => acc + item.total_time, 0);
+            // console.log(sum);
+            rows.push({username: 'remain', total_time: 54000000 - sum});
+
+            // the unit of the total_time is ms, convert it to minute
+            rows.forEach((item) => {
+                item.total_time = item.total_time / 60000;
+            })
+
+            // console.log(rows)
+
+            resolve(rows);
+        });
+    })
+}
+
 export default function util() {
     return (<></>)
 }

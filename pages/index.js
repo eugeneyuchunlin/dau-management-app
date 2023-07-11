@@ -1,57 +1,128 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import db from '../database'
 import Nvbar from '../common/components/nvbar.js'
+import MonthStatistic from '../common/components/MonthStatistic';
 import { LoginProvider } from '../common/contexts/LoginContext';
-import { Container, Row, Col} from 'react-bootstrap';
+import { Container, Row, Col, Offcanvas} from 'react-bootstrap';
 import PieChart from '../common/components/PieChart';
 import LineChart from '../common/components/LineChart'
 import Footer from '../common/components/Footer'
+import styles from '../styles/Index.module.css'
 
-import { daysInCurrentMonth, daysInTheMonth } from '../util/lib/utils';
+import { daysInCurrentMonth, daysInTheMonth} from '../util/lib/utils';
+
 
 
 export default function HomePage(props){
-    const data = props.data
-    const daily_data = props.daily_data;
+    // const data = props.data
+    // const daily_data = props.daily_data;
+    // const month_data = props.month_data;
+
+    const [data, setData] = useState(props.data);
+    const [dailyData, setDailyData] = useState(props.daily_data);
+    const [monthlyData, setMonthlyData] = useState(props.month_data);
+    
+    // console.log(monthlyData)
+
+    const [show, setShow] = useState(true);
+    const [month, setMonth] = useState(monthlyData[0].start_time);
+   
+    const updateData = async (year, month) => {
+        const response = await fetch(`/api/statistic?year=${year}&month=${month}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        
+        return new Promise((resolve, reject) => {
+            if(response.status === 200){
+                resolve(response.json());
+            }else{
+                reject(new Error(response.statusText));
+            }
+        })
+    }
+    
+    const handleChooseMonth = (month) => {
+        setMonth(month)
+    }
+
+    useEffect(()=>{
+        // console.log("month : ", month)
+        updateData(month.split('-')[0], month.split('-')[1]).then((data) => {
+            setData(data.data);
+            setDailyData(data.daily_data);
+        }).catch((err) => {
+            console.log(err.message);
+        })
+
+    }, [month])
+
     return (
         <>
             <LoginProvider>
-                <Nvbar />
+                <Nvbar month={true}>
+                    <MonthStatistic data={monthlyData} onClick={handleChooseMonth}/>
+                </Nvbar>
             </LoginProvider>
-            <Container fluid="xl" style={{
-                marginTop: "50px",
-                marginBottom: "50px"
-            }}>
-                <Row>
-                    <Col>
-                        <div className='maincontainer'>
-                            <PieChart data={data}/>
-                        </div>
+            <Container className={styles.main_container}>
+                <Row className={styles.row_block}>
+                    <Col sm={8} className={styles.block}>
+                        <PieChart data={data}/>
+                    </Col>
+                    <Col className={styles.block}>
+
                     </Col>
                 </Row>
-                <Row>
-                    <Col>
-                        <div className='maincontainer'>
-                            <LineChart daily_data={daily_data}/>
-                        </div>
+                <Row className={styles.row_block}>
+                    <Col className={styles.block}>
+                        <LineChart daily_data={dailyData} year={month.split('-')[0]} month={month.split('-')[1]} />
                     </Col>
                 </Row>
             </Container>
             <Footer />
         </>
     )
-
 }
+
 
 export async function getServerSideProps(){
     const data = await getDataFromDatabase();
     const daily_data = await getDailyDataFromDatabase();
+    const month_data = await getMonthDataFromDatabase();
     return {
         props: {
-            data, daily_data
+            data, daily_data, month_data
         }
     }
 }
+
+async function getMonthDataFromDatabase() {
+    const sql = `SELECT strftime('%Y-%m', start_time) AS start_time, SUM(computation_time_ms) AS monthly_computation_time 
+                 FROM test_service_stats 
+                 GROUP BY strftime('%Y-%m', start_time);`;
+  
+    return new Promise((resolve, reject) => {
+      db.all(sql, [], (err, rows) => {
+        if (err) {
+          console.error(err.message);
+          reject(err);
+        }
+  
+        // Convert computation time to minutes
+        rows.forEach((item) => {
+          item.monthly_computation_time = Number(item.monthly_computation_time / 60000).toFixed(2);
+        });
+  
+        console.log(rows); // Debug: Check if rows are correct
+  
+        resolve(rows);
+      });
+    });
+  }
+  
 
 async function getDailyDataFromDatabase(){
     // get the number of days in the current month

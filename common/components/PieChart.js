@@ -10,7 +10,7 @@ export default function PieChart({ data }) {
         labels: data.map((item) => item.username),
         datasets: [
         {
-            label: "Usage",
+            label: "Used",
             data: data.map((item) => item.total_time),
             backgroundColor: backgroundColor,
             borderColor: borderColor,
