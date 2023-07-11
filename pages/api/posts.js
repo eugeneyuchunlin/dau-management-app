@@ -34,16 +34,17 @@ async function getJobStatusById(job_id) {
   }
 }
 
-async function insertComputationData(username, job_id, job_status) {
+async function insertComputationData(username, job_id, job_status, time_limit_sec) {
   try{
     let sql, params;
     if (job_status === undefined) {
       // job_status is undefined when the job is not found on the fujitsu server
-      sql = 'INSERT INTO test_service_stats (username, job_id) VALUES (?, ?) ON CONFLICT(job_id) DO UPDATE SET username = ?';
-      params = [username, job_id, username];
+      sql = 'INSERT INTO test_service_stats (username, job_id, computation_time_ms) VALUES (?, ?, ?) ON CONFLICT(job_id) DO UPDATE SET username = ?';
+      params = [username, job_id, time_limit_sec, username];
     } else {
-      sql = 'INSERT INTO test_service_stats (username, job_id, status, start_time) VALUES (?, ?, ?, ?) ON CONFLICT(job_id) DO UPDATE SET username = ?, status = ?, start_time = ?';
-      params = [username, job_id, job_status.job_status, job_status.start_time, username, job_status.job_status, job_status.start_time];
+      console.log("insert computation data : ", time_limit_sec);
+      sql = 'INSERT INTO test_service_stats (username, job_id, status, start_time, computation_time_ms) VALUES (?, ?, ?, ?, ?) ON CONFLICT(job_id) DO UPDATE SET username = ?, status = ?, start_time = ?';
+      params = [username, job_id, job_status.job_status, job_status.start_time, time_limit_sec, username, job_status.job_status, job_status.start_time];
     }
 
     return new Promise((resolve, reject) => {
@@ -64,7 +65,7 @@ async function updateSolveTime(job_id) {
   try{
     const {solve_time, status} = await getSolveTimeAndStatusOfJobId(job_id);
     // update it into the database
-    console.log("updaed solve time : ", solve_time),
+    console.log("updated solve time : ", solve_time),
     console.log("status : ", status)
     const sql = 'UPDATE test_service_stats SET computation_time_ms = ?, status = ? WHERE job_id = ?';
     const params = [solve_time, status, job_id];
@@ -92,13 +93,16 @@ async function updateSolveTime(job_id) {
 export default async function handler(req, res) {
   if (req.method === 'POST') {
     const { api_key, job_id, time_limit_sec } = req.body;
+    if(time_limit_sec === undefined){
+      res.status(400).json({error : "time_limit_sec is undefined"});
+    }
     try{
       const username = await getUserName(api_key);
       try{
         const job_status = await getJobStatusById(job_id);
         console.log("job_status of ", job_id, " : ", job_status);
         try{
-          await insertComputationData(username, job_id, job_status);
+          await insertComputationData(username, job_id, job_status, time_limit_sec*1000);
           if(job_status !== undefined){
             // job_status is undefined when the job is not found on the fujitsu server
             // try to get the solution

@@ -168,7 +168,7 @@ async function postRequest(job_id, api_key, solve_time){
             body: JSON.stringify({
                 job_id: job_id,
                 api_key: api_key,
-                solve_time: solve_time
+                time_limit_sec: solve_time
             })
         }).then((response) => {
             return response.json();
@@ -246,10 +246,10 @@ async function getJobsRequest() {
   }
   
 
-// const job_id = solveAndPostRequest('Chun', 10);
+const job_id = solveAndPostRequest('Chun', 10);
 
 // solveAndPostRequest('Chun', 10).then((job_id) => {
-//     setTimeout(cancelTheJobRequest, 2000, job_id);
+/, time_limit_sec/     // setTimeout(cancelTheJobRequest, 2000, job_id);
 // })
 
 // Post request to testing server /api/solve
@@ -264,6 +264,6 @@ async function getJobsRequest() {
 //     console.log(data);
 // })
 
-getTheAPIKey('Chun').then((api_key) => {
-    console.log(api_key);
-})
+// getTheAPIKey('Chun').then((api_key) => {
+//     console.log(api_key);
+// })
