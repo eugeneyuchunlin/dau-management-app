@@ -7,6 +7,7 @@ import { Container, Row, Col, Offcanvas} from 'react-bootstrap';
 import PieChart from '../common/components/PieChart';
 import LineChart from '../common/components/LineChart'
 import Footer from '../common/components/Footer'
+import Use from '../common/components/Use';
 import styles from '../styles/Index.module.css'
 
 import { daysInCurrentMonth, daysInTheMonth} from '../util/lib/utils';
@@ -73,7 +74,7 @@ export default function HomePage(props){
                         <PieChart data={data}/>
                     </Col>
                     <Col className={styles.block}>
-
+                        <Use data={data}/>
                     </Col>
                 </Row>
                 <Row className={styles.row_block}>

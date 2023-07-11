@@ -11,7 +11,7 @@ export default function PieChart({ data }) {
         datasets: [
         {
             label: "Used",
-            data: data.map((item) => item.total_time),
+            data: data.map((item) => item.total_time > 0 ? item.total_time : 0),
             backgroundColor: backgroundColor,
             borderColor: borderColor,
             borderWidth: 1,
