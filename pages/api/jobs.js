@@ -1,6 +1,7 @@
 import db from "../../database"
 import FUJITSU_API_KEY from "../../config"
 import { URL, RESULT_END_POINT } from "../../common/constants/url"
+import { TABEL_NAME } from "../../common/constants/constant"
 
 import { fetchJobList, getSolveTimeAndStatusOfJobId } from "../../util/lib/utils"
 // import {}
@@ -79,7 +80,7 @@ function synchronizeDB(data, existed_job_id) {
         if (unknown_username_job_list_done.length > 0) {
             insertAndUpdateUnknownJobs(
                 unknown_username_job_list_done,
-                `INSERT INTO test_service_stats 
+                `INSERT INTO ${TABLE_NAME} 
                 (username, job_id, status, start_time, computation_time_ms) VALUES (?, ?, ?, ?, ?)
                 ON CONFLICT (job_id) DO UPDATE SET username = ?, status = ?, start_time = ?, start_time_utc8 = ?, computation_time_ms = ?`,
                 (job) => [
@@ -93,7 +94,7 @@ function synchronizeDB(data, existed_job_id) {
         if (unknown_username_job_list_not_done.length > 0) {
             insertAndUpdateUnknownJobs(
                 unknown_username_job_list_not_done,
-                `INSERT INTO test_service_stats
+                `INSERT INTO ${TABLE_NAME} 
                 (username, job_id, status, start_time) VALUES (?, ?, ?, ?)
                 ON CONFLICT (job_id) DO UPDATE SET username = ?, status = ?, start_time = ?, start_time_utc8 = ?`,
                 (job) => [
@@ -122,7 +123,7 @@ function synchronizeDB(data, existed_job_id) {
                 solve_time_placeholder = ""
                 params = [job.job_status, job.start_time, job.start_time_utc8, job.job_id]
             }
-            const update_sql = `UPDATE test_service_stats SET status = ?, start_time = ?, start_time_utc8 = ? ${solve_time_placeholder} WHERE job_id = ?`;
+            const update_sql = `UPDATE ${TABLE_NAME} SET status = ?, start_time = ?, start_time_utc8 = ? ${solve_time_placeholder} WHERE job_id = ?`;
 
             db.run(update_sql, params, (err) => {
                 if (err) {
@@ -143,7 +144,7 @@ function joinDBData(data) {
 
         const placeholders = job_id_list.map(() => "?").join(",");
         // console.log(placeholders)
-        const sql = `select username, job_id from test_service_stats where job_id in (${placeholders})`;
+        const sql = `select username, job_id from ${TABLE_NAME} where job_id in (${placeholders})`;
         db.all(sql, job_id_list, async (err, result) => {
             if (err) {
                 console.log("Error fetching data from db, ", err)

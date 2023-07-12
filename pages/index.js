@@ -9,6 +9,7 @@ import LineChart from '../common/components/LineChart'
 import Footer from '../common/components/Footer'
 import Use from '../common/components/Use';
 import styles from '../styles/Index.module.css'
+import { TABLE_NAME } from '../common/constants/constant';
 
 import { daysInCurrentMonth, daysInTheMonth} from '../util/lib/utils';
 
@@ -104,7 +105,7 @@ export async function getServerSideProps(){
 
 async function getMonthDataFromDatabase() {
     const sql = `SELECT strftime('%Y-%m', start_time) AS start_time, SUM(computation_time_ms) AS monthly_computation_time 
-                 FROM test_service_stats 
+                 FROM ${TABLE_NAME} 
                  GROUP BY strftime('%Y-%m', start_time);`;
   
     return new Promise((resolve, reject) => {
@@ -141,7 +142,7 @@ async function getDailyDataFromDatabase(){
     }
 
     const sql = `SELECT username, DATE(start_time) AS start_time, SUM(computation_time_ms) AS daily_computation_time 
-    FROM test_service_stats WHERE start_time >= '${current_year}-${current_month}-01 00:00:00' AND start_time <= '${current_year}-${current_month}-${days_in_month} 23:59:59' GROUP BY username, date(start_time)`
+    FROM ${TABLE_NAME} WHERE start_time >= '${current_year}-${current_month}-01 00:00:00' AND start_time <= '${current_year}-${current_month}-${days_in_month} 23:59:59' GROUP BY username, date(start_time)`
 
     // console.log(sql);
 
@@ -212,7 +213,7 @@ async function getDataFromDatabase(){
 
     // query the database for the data in the current month
     const sql = `SELECT username, SUM(computation_time_ms) AS total_time 
-    FROM test_service_stats WHERE start_time >= '${current_year}-${current_month}-01 00:00:00' AND start_time <= '${current_year}-${current_month}-${days_in_month} 23:59:59'
+    FROM ${TABLE_NAME} WHERE start_time >= '${current_year}-${current_month}-01 00:00:00' AND start_time <= '${current_year}-${current_month}-${days_in_month} 23:59:59'
     GROUP BY username;`
 
     return new Promise((resolve, reject) => {

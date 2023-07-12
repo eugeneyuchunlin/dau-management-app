@@ -4,6 +4,7 @@ import { LoginProvider } from "../common/contexts/LoginContext"
 import { Col, Row, Container } from "react-bootstrap";
 import HistoryTable from "../common/components/HistoryTable";
 import Footer from '../common/components/Footer'
+import { TABLE_NAME } from "../common/constants/constant";
 
 import db from '../database'
 
@@ -49,7 +50,7 @@ export async function getServerSideProps(context) {
 }
 
 async function getDataFromDatabase(){
-    const sql = `SELECT * from test_service_stats;`
+    const sql = `SELECT * from ${TABLE_NAME};`
     return new Promise((resolve, reject) => {
         db.all(sql, [], (err, rows) => {
             if(err){

@@ -1,5 +1,6 @@
 import FUJITSU_API_KEY from "../../config";
 import { URL, RESULT_END_POINT, JOBS_END_POINT } from "../../common/constants/url"
+import { TABLE_NAME } from "../../common/constants/constant"
 
 export async function fetchJobList() {
     const url = URL;
@@ -122,7 +123,7 @@ export async function getDailyDataFromDatabase(db, year, month){
     }
 
     const sql = `SELECT username, DATE(start_time) AS start_time, SUM(computation_time_ms) AS daily_computation_time 
-    FROM test_service_stats WHERE start_time >= '${year}-${month}-01 00:00:00' AND start_time <= '${year}-${month}-${days_in_month} 23:59:59' GROUP BY username, date(start_time)`
+    FROM ${TABLE_NAME} WHERE start_time >= '${year}-${month}-01 00:00:00' AND start_time <= '${year}-${month}-${days_in_month} 23:59:59' GROUP BY username, date(start_time)`
 
     // console.log(sql);
 
@@ -189,7 +190,7 @@ export async function getDataFromDatabase(db, year, month){
 
     // query the database for the data in the current month
     const sql = `SELECT username, SUM(computation_time_ms) AS total_time 
-    FROM test_service_stats WHERE start_time >= '${year}-${month}-01 00:00:00' AND start_time <= '${year}-${month}-${days_in_month} 23:59:59'
+    FROM ${TABLE_NAME} WHERE start_time >= '${year}-${month}-01 00:00:00' AND start_time <= '${year}-${month}-${days_in_month} 23:59:59'
     GROUP BY username;`
 
     return new Promise((resolve, reject) => {

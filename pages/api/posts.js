@@ -1,6 +1,7 @@
 import { ApiError } from 'next/dist/server/api-utils';
 import db from '../../database'
 import { fetchJobList, fetchJobResult, getSolveTimeAndStatusOfJobId} from '../../util/lib/utils';
+import { TABLE_NAME } from '../../common/constants/constant';
 
 async function getUserName(api_key) {
   const user_sql = 'SELECT username FROM users WHERE api_key = ?';
@@ -39,11 +40,11 @@ async function insertComputationData(username, job_id, job_status, time_limit_se
     let sql, params;
     if (job_status === undefined) {
       // job_status is undefined when the job is not found on the fujitsu server
-      sql = 'INSERT INTO test_service_stats (username, job_id, computation_time_ms) VALUES (?, ?, ?) ON CONFLICT(job_id) DO UPDATE SET username = ?';
+      sql = `INSERT INTO ${TABLE_NAME} (username, job_id, computation_time_ms) VALUES (?, ?, ?) ON CONFLICT(job_id) DO UPDATE SET username = ?`;
       params = [username, job_id, time_limit_sec, username];
     } else {
       console.log("insert computation data : ", time_limit_sec);
-      sql = 'INSERT INTO test_service_stats (username, job_id, status, start_time, computation_time_ms) VALUES (?, ?, ?, ?, ?) ON CONFLICT(job_id) DO UPDATE SET username = ?, status = ?, start_time = ?';
+      sql = `INSERT INTO ${TABLE_NAME} (username, job_id, status, start_time, computation_time_ms) VALUES (?, ?, ?, ?, ?) ON CONFLICT(job_id) DO UPDATE SET username = ?, status = ?, start_time = ?`;
       params = [username, job_id, job_status.job_status, job_status.start_time, time_limit_sec, username, job_status.job_status, job_status.start_time];
     }
 
@@ -67,7 +68,7 @@ async function updateSolveTime(job_id) {
     // update it into the database
     console.log("updated solve time : ", solve_time),
     console.log("status : ", status)
-    const sql = 'UPDATE test_service_stats SET computation_time_ms = ?, status = ? WHERE job_id = ?';
+    const sql = `UPDATE ${TABLE_NAME} SET computation_time_ms = ?, status = ? WHERE job_id = ?`;
     const params = [solve_time, status, job_id];
 
     return new Promise((resolve, reject) => {
