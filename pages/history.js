@@ -20,7 +20,7 @@ export default function HistoryPage({data}) {
             setYear(data[data.length-1].start_time.split('-')[0]);
             setMonth(data[data.length-1].start_time.split('-')[1]);
         }
-    })
+    }, [data])
 
 
     const changeMonth = async (time) => {
