@@ -1,3 +1,5 @@
+# Digital Annealing Unit Management Web Application
+
 ## Introduction
 
 This web application aims to monitor real-time usage of the digital annealing unit. The DAU computation service is provided by the Fujitsu Ltd.
