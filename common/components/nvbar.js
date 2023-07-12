@@ -40,7 +40,7 @@ export default function Nvbar({month, children}) {
             { month ? <Nav.Link onClick={()=>setShowOffcanvas(true)}>Month</Nav.Link> : <></>}
             <Nav.Link href="/jobs">Alive Job List</Nav.Link>
             <Nav.Link href="/history">History</Nav.Link>
-            <Nav.Link href="/doc">Doc</Nav.Link>
+            <Nav.Link href="https://github.com/yuchun1214/dau-management-app/blob/e88c43cc9104e33ef33874c2b667abc6fb5c25bd/README.md">Doc</Nav.Link>
           </Nav>
           <Navbar.Collapse className="justify-content-end">
             {isLoggedIn ? (
