@@ -1,0 +1,13 @@
+.tableContainer {
+    overflow-y: scroll;
+    max-height: 800px;
+    background-color: white;
+  }
+  
+  ._thead th._th {
+    position: sticky !important;
+    top: 0;
+    background-color: white;
+    z-index: 1;
+  }
+  

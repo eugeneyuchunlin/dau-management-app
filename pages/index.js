@@ -120,8 +120,6 @@ async function getMonthDataFromDatabase() {
           item.monthly_computation_time = Number(item.monthly_computation_time / 60000).toFixed(2);
         });
   
-        console.log(rows); // Debug: Check if rows are correct
-  
         resolve(rows);
       });
     });
