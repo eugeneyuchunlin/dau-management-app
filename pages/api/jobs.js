@@ -1,7 +1,7 @@
 import db from "../../database"
 import FUJITSU_API_KEY from "../../config"
 import { URL, RESULT_END_POINT } from "../../common/constants/url"
-import { TABEL_NAME } from "../../common/constants/constant"
+import { TABLE_NAME } from "../../common/constants/constant"
 
 import { fetchJobList, getSolveTimeAndStatusOfJobId } from "../../util/lib/utils"
 // import {}
