@@ -69,7 +69,7 @@ export async function getStaticProps(context) {
 
 
 async function getMonthDataFromDatabase() {
-    const sql = `SELECT strftime('%Y-%m', start_time) AS start_time 
+    const sql = `SELECT strftime('%Y-%m', start_time) AS start_time, start_time_utc8
                  FROM ${TABLE_NAME} 
                  GROUP BY strftime('%Y-%m', start_time);`;
   

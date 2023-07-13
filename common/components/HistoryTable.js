@@ -48,7 +48,7 @@ export default function HistoryTable({year, month }) {
                 <td>{job.username}</td>
                 <td>{job.status}</td>
                 <td>{job.computation_time_ms}</td>
-                <td>{job.start_time}</td>
+                <td>{job.start_time_utc8}</td>
               </tr>
             ))}
         </tbody>
