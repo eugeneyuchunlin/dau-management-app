@@ -1,7 +1,17 @@
-import Button from 'react-bootstrap/Button';
-import Form from 'react-bootstrap/Form';
+import { Button, Form } from 'react-bootstrap';
+import { useState, useCallback } from 'react';
+import { GoogleReCaptcha } from 'react-google-recaptcha-v3';
 
 export default function LoginForm() {
+    const [token, setToken] = useState();
+    const [refreshReCaptcha, setRefreshReCaptcha] = useState(false);
+
+    const onVerify = useCallback((token) => {
+        console.log(token); // Will print the token
+        setToken(token);
+    })
+
+    
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -11,6 +21,7 @@ export default function LoginForm() {
 
         const endpoint = '/api/login';
         const data = {
+            token: token,
             username: event.target.username.value,
             password: event.target.password.value
         };
@@ -36,6 +47,7 @@ export default function LoginForm() {
         }else{
             alert(resData.message)
         }
+        setRefreshReCaptcha(r => !r);
     };
 
   return (
@@ -50,6 +62,10 @@ export default function LoginForm() {
         <Form.Label>Password</Form.Label>
         <Form.Control type="password" placeholder="Password" />
       </Form.Group>
+      <GoogleReCaptcha
+        onVerify={onVerify}
+        refreshReCaptcha={refreshReCaptcha}
+        />
       <Button variant="primary" type="submit">
         Submit
       </Button>
