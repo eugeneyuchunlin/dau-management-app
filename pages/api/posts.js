@@ -114,7 +114,7 @@ export default async function handler(req, res) {
             }else{
               // set timer to wait
               console.log("set timer to wait")
-              setTimeout(updateSolveTime, time_limit_sec * 1000, job_id) 
+              setTimeout(updateSolveTime, time_limit_sec * 800, job_id) 
             }
           }
           res.status(200).json({'message' : 'success'});

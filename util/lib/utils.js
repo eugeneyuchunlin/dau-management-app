@@ -101,6 +101,10 @@ export async function getSolveTimeAndStatusOfJobId(job_id) {
             }).catch((err) => {
                 clearInterval(interval_id);
                 console.log("err : ", err)
+                resolve({
+                    solve_time : null,
+                    status: 'Missing'
+                })
             })
   
           }, 3000);

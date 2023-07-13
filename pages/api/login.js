@@ -8,6 +8,7 @@ var cookie = require('cookie')
 function validation(username, password) {
     return new Promise((resolve, reject) => {
         const hash_password = createHash('sha256').update(password).digest('hex');
+        console.log(hash_password) 
         const sql = 'SELECT * FROM users WHERE username = ? AND password = ?';
         const params = [username, hash_password];
         db.get(sql, params, (err, row) => {
