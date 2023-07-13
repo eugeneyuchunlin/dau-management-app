@@ -103,7 +103,7 @@ export async function getSolveTimeAndStatusOfJobId(job_id) {
                 console.log("err : ", err)
             })
   
-          }, 3000);
+          }, 1500);
   
         } catch (err) {
           console.log('Failed to get solution from Fujitsu API')
