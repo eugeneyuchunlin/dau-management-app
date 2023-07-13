@@ -44,8 +44,9 @@ async function insertComputationData(username, job_id, job_status, time_limit_se
       params = [username, job_id, time_limit_sec, username];
     } else {
       console.log("insert computation data : ", time_limit_sec);
-      sql = `INSERT INTO ${TABLE_NAME} (username, job_id, status, start_time, computation_time_ms) VALUES (?, ?, ?, ?, ?) ON CONFLICT(job_id) DO UPDATE SET username = ?, status = ?, start_time = ?`;
-      params = [username, job_id, job_status.job_status, job_status.start_time, time_limit_sec, username, job_status.job_status, job_status.start_time];
+      
+      sql = `INSERT INTO ${TABLE_NAME} (username, job_id, status, start_time, computation_time_ms, start_time_utc8) VALUES (?, ?, ?, ?, ?, ?) ON CONFLICT(job_id) DO UPDATE SET username = ?, status = ?, start_time = ?, start_time_utc8 = ?`;
+      params = [username, job_id, job_status.job_status, job_status.start_time, time_limit_sec, job_status.start_time_utc8, username, job_status.job_status, job_status.start_time, job_status.start_time_utc8];
     }
 
     return new Promise((resolve, reject) => {
@@ -66,10 +67,18 @@ async function updateSolveTime(job_id) {
   try{
     const {solve_time, status} = await getSolveTimeAndStatusOfJobId(job_id);
     // update it into the database
+
     console.log("updated solve time : ", solve_time),
     console.log("status : ", status)
-    const sql = `UPDATE ${TABLE_NAME} SET computation_time_ms = ?, status = ? WHERE job_id = ?`;
-    const params = [solve_time, status, job_id];
+    let sql = ``
+    let params = []
+    if(status === 'Missing'){
+      sql = `UPDATE ${TABLE_NAME} SET status = ? WHERE job_id = ?`;
+      params = [status, job_id];
+    }else{
+      sql = `UPDATE ${TABLE_NAME} SET computation_time_ms = ?, status = ? WHERE job_id = ?`;
+      params = [solve_time, status, job_id];
+    }
 
     return new Promise((resolve, reject) => {
       db.run(sql, params, (err) => {
