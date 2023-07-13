@@ -12,7 +12,7 @@ Additionally, the app could be seen as a tiny user interface of Fujitsu's API. I
 
 ### /api/posts
 
-Register your `job_id` with your `username` by indicating the your `api_key`
+Register your `job_id` with your `username` by indicating your `api_key`
 
 **header**
 ```
