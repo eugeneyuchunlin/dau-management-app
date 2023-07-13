@@ -44,7 +44,7 @@ export default function Use({data}){
                 </Col>
             </Row>
             <Row>
-                <Col sm={3}>
+                <Col sm={2}>
                 </Col>
                 <Col>
                     <ul className={styles.list}>
@@ -57,7 +57,7 @@ export default function Use({data}){
                     </ul>
                 </Col>
                 
-                <Col sm={3}></Col>
+                <Col sm={2}></Col>
             </Row>
 
         </Container> 
