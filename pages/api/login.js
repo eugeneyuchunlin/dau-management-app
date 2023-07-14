@@ -61,7 +61,7 @@ export default async function handler(req, res) {
                     path: '/', // Path of the cookie
                 }))
                 res.status(200).json({ message: 'ok' });
-            }else if(code === 404){
+            }else if(login_response === 404){
                 res.status(404).json({ message: 'username or password incorrect' });
             }else{
                 res.status(500).json({ message: 'Internal Server Error' });
