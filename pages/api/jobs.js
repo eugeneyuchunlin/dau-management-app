@@ -81,11 +81,11 @@ function synchronizeDB(data, existed_job_id) {
             insertAndUpdateUnknownJobs(
                 unknown_username_job_list_done,
                 `INSERT INTO ${TABLE_NAME} 
-                (username, job_id, status, start_time, computation_time_ms) VALUES (?, ?, ?, ?, ?)
+                (username, job_id, status, start_time, start_time_utc8, computation_time_ms) VALUES (?, ?, ?, ?, ?, ?)
                 ON CONFLICT (job_id) DO UPDATE SET username = ?, status = ?, start_time = ?, start_time_utc8 = ?, computation_time_ms = ?`,
                 (job) => [
                     job.username, job.job_id, job.job_status,
-                    job.start_time, job.solve_time, job.username,
+                    job.start_time, job.start_time_utc8, job.solve_time, job.username,
                     job.job_status, job.start_time, job.start_time_utc8, job.solve_time
                 ]
             )
@@ -95,11 +95,11 @@ function synchronizeDB(data, existed_job_id) {
             insertAndUpdateUnknownJobs(
                 unknown_username_job_list_not_done,
                 `INSERT INTO ${TABLE_NAME} 
-                (username, job_id, status, start_time) VALUES (?, ?, ?, ?)
+                (username, job_id, status, start_time, start_time_utc8) VALUES (?, ?, ?, ?, ?)
                 ON CONFLICT (job_id) DO UPDATE SET username = ?, status = ?, start_time = ?, start_time_utc8 = ?`,
                 (job) => [
                     job.username, job.job_id, job.job_status,
-                    job.start_time, job.username, job.job_status, job.start_time, job.start_time_utc8
+                    job.start_time, job.start_time_utc8, job.username, job.job_status, job.start_time, job.start_time_utc8
                 ]
             ) 
         }
